@@ -1,0 +1,5 @@
+{
+  "name": "DevCalc: Calculadoras de Programación",
+  "description": "Una colección de calculadoras y herramientas para desarrolladores, incluyendo conversores de base numérica (binario, hexadecimal, decimal) y codificador/decodificador de Base64. Diseñado para ser rápido, intuitivo y estéticamente agradable.",
+  "requestFramePermissions": []
+}
