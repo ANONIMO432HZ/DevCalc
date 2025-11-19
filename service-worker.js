@@ -1,4 +1,4 @@
-const CACHE_NAME = 'devsuite-v4';
+const CACHE_NAME = 'devsuite-v6';
 // IMPORTANTE: Solo cacheamos archivos locales. 
 // Las CDNs externas (Tailwind, React) provocan errores CORS que rompen la instalación de la PWA.
 const ASSETS_TO_CACHE = [
@@ -6,8 +6,6 @@ const ASSETS_TO_CACHE = [
   '/index.html',
   '/dist/bundle.js',
   '/manifest.json',
-  '/icons/icon-32.png',
-  '/icons/icon-128.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
 ];
@@ -16,7 +14,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Cacheando archivos locales v4');
+      console.log('[Service Worker] Cacheando archivos locales v6');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
@@ -49,17 +47,13 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        // Si la red responde bien, devolvemos eso
-        // Opcional: Podríamos cachear dinámicamente aquí, pero para CDNs opacas es riesgoso
         return networkResponse;
       })
       .catch(() => {
-        // Si la red falla (Offline), buscamos en caché
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // Si no está en caché y no hay red, no podemos hacer mucho más por ahora
           console.log('[Service Worker] Recurso no disponible offline:', event.request.url);
         });
       })
