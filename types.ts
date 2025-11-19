@@ -1,10 +1,37 @@
+
 export enum CalculatorType {
   Welcome = 'welcome',
+  UnitConverter = 'unitConverter',
   NumberBase = 'numberBase',
+  BitwiseCalculator = 'bitwiseCalculator',
   JSON = 'json',
-  URLEncoder = 'urlEncoder',
   HashGenerator = 'hashGenerator',
+  PaletteGenerator = 'paletteGenerator',
   UUIDGenerator = 'uuidGenerator',
   UnixTimestamp = 'unixTimestamp',
-  TimeConverter = 'timeConverter',
+  URLEncoder = 'urlEncoder',
+}
+
+export interface GoogleUser {
+  name: string;
+  email: string;
+  picture: string;
+}
+
+export interface AuthContextType {
+  user: GoogleUser | null;
+  isLoading: boolean;
+  login: () => void;
+  logout: () => void;
+  uploadFileToDrive: (content: string, filename: string, mimeType: string) => Promise<void>;
+  isDriveReady: boolean;
+}
+
+export interface HistoryItem {
+  id: string;
+  timestamp: number;
+  tool: string;
+  details: string;
+  input: string;
+  output: string;
 }

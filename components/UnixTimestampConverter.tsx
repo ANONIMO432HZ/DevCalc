@@ -1,5 +1,9 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import InputGroup from './InputGroup';
+import { useHistory } from '../contexts/HistoryContext';
+
+const MAX_SAFE_TIMESTAMP = 8640000000000; 
 
 const getRelativeTime = (date: Date): string => {
   const now = new Date();
@@ -28,6 +32,7 @@ const UnixTimestampConverter: React.FC = () => {
   const [localDate, setLocalDate] = useState('');
   const [relativeDate, setRelativeDate] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { addToHistory } = useHistory();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -45,21 +50,25 @@ const UnixTimestampConverter: React.FC = () => {
       return;
     }
 
-    if (!/^\d+$/.test(timestamp)) {
-      setError('Por favor, introduce solo números.');
+    if (!/^-?\d+$/.test(timestamp)) {
+      setError('Por favor, introduce solo números válidos.');
       return;
     }
 
     const tsNumber = Number(timestamp);
-    // Check for timestamps that are too large for JS Date
-    if (tsNumber * 1000 > 8.64e15) {
-        setError('El timestamp es demasiado grande y está fuera del rango de fechas soportado.');
+    
+    if (Math.abs(tsNumber) > MAX_SAFE_TIMESTAMP) {
+        setError('El timestamp excede el límite máximo soportado por JavaScript (aprox. año 270,000).');
+        setGmtDate('');
+        setLocalDate('');
+        setRelativeDate('');
         return;
     }
+
     const date = new Date(tsNumber * 1000);
 
     if (isNaN(date.getTime())) {
-      setError('Timestamp inválido o fuera de rango.');
+      setError('Timestamp inválido.');
       return;
     }
 
@@ -93,7 +102,6 @@ const UnixTimestampConverter: React.FC = () => {
     }
   };
 
-
   const setTimeToNow = useCallback(() => {
     const nowTimestamp = Math.floor(Date.now() / 1000).toString();
     setInputTimestamp(nowTimestamp);
@@ -110,9 +118,19 @@ const UnixTimestampConverter: React.FC = () => {
   
   const noOp = () => {};
 
+  const saveToHistory = () => {
+      if (!inputTimestamp || error) return;
+      addToHistory({
+          tool: 'Tiempo Unix',
+          details: 'Conversión Timestamp',
+          input: `Timestamp: ${inputTimestamp}`,
+          output: `Local: ${localDate} | GMT: ${gmtDate}`
+      });
+  };
+
   return (
     <div className="space-y-6">
-      <div className="p-4 bg-slate-100 dark:bg-slate-900 rounded-lg text-center">
+      <div className="p-4 bg-slate-100 dark:bg-slate-900 rounded-lg text-center border border-slate-200 dark:border-slate-700">
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Timestamp Unix Actual (Segundos)</p>
         <p className="text-3xl font-mono text-lime-500 dark:text-lime-400 tracking-wider">{currentTimestamp}</p>
       </div>
@@ -150,8 +168,15 @@ const UnixTimestampConverter: React.FC = () => {
 
       <div className="flex flex-wrap gap-4 justify-end pt-2">
         <button
+          onClick={saveToHistory}
+          disabled={!inputTimestamp || !!error}
+          className="bg-lime-500 hover:bg-lime-600 dark:bg-lime-600 dark:hover:bg-lime-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Guardar
+        </button>
+        <button
           onClick={setTimeToNow}
-          className="bg-lime-500 hover:bg-lime-600 dark:bg-lime-600 dark:hover:bg-lime-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200"
+          className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-md transition-colors duration-200"
         >
           Ir a Ahora
         </button>

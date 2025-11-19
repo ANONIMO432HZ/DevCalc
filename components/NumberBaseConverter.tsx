@@ -1,6 +1,8 @@
+
 import React, { useState, useCallback } from 'react';
 import InputGroup from './InputGroup';
 import TextareaGroup from './TextareaGroup';
+import { useHistory } from '../contexts/HistoryContext';
 
 // Tipos y constantes para el conversor de bytes
 const BYTE_UNITS = {
@@ -32,6 +34,7 @@ const NumberBaseConverter: React.FC = () => {
   const [ascii, setAscii] = useState('');
 
   const [byteValues, setByteValues] = useState(initialByteValues);
+  const { addToHistory } = useHistory();
 
   const isTextMode = !!text || !!base64Text || !!hexBytes;
   
@@ -215,6 +218,35 @@ const NumberBaseConverter: React.FC = () => {
     setByteValues(newValues);
   }, []);
 
+  const saveToHistory = () => {
+    if (isTextMode) {
+        addToHistory({
+            tool: 'Conversor de Bases (Texto)',
+            details: 'Conversión de Texto/Bytes',
+            input: text || base64Text.substring(0, 20) + '...',
+            output: `Hex: ${hexBytes.substring(0, 20)}... | B64: ${base64Text.substring(0, 20)}...`
+        });
+    } else if (decimal || binary || hex) {
+         addToHistory({
+            tool: 'Conversor de Bases (Num)',
+            details: 'Conversión Numérica',
+            input: decimal ? `Dec: ${decimal}` : (binary ? `Bin: ${binary}` : `Hex: ${hex}`),
+            output: `Dec: ${decimal} | Hex: ${hex} | Bin: ${binary}`
+        });
+    } else {
+        // Check byte units
+        const filled = Object.entries(byteValues).find(([_, v]) => v !== '');
+        if (filled) {
+             addToHistory({
+                tool: 'Conversor de Bytes',
+                details: `Unidad base: ${BYTE_UNITS[filled[0] as ByteUnit].name}`,
+                input: `${filled[1]} ${filled[0]}`,
+                output: `Bytes: ${byteValues.bytes} | MB: ${byteValues.mb} | GB: ${byteValues.gb}`
+            });
+        }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -248,7 +280,10 @@ const NumberBaseConverter: React.FC = () => {
         ))}
       </div>
 
-      <div className="text-right pt-2">
+      <div className="text-right pt-2 flex justify-end gap-3">
+        <button onClick={saveToHistory} className="bg-lime-500 hover:bg-lime-600 dark:bg-lime-600 dark:hover:bg-lime-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200">
+          Guardar
+        </button>
         <button onClick={clearAll} className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-md transition-colors duration-200">
           Limpiar Todo
         </button>

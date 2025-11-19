@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CryptoJS from 'crypto-js';
 import TextareaGroup from './TextareaGroup';
@@ -24,6 +25,8 @@ const detectHashType = (hash: string): string => {
     }
 };
 
+// Límite de tamaño de archivo para evitar colgar el navegador (200 MB)
+const MAX_FILE_SIZE = 200 * 1024 * 1024;
 
 const HashGenerator: React.FC = () => {
     const [input, setInput] = useState('');
@@ -35,7 +38,16 @@ const HashGenerator: React.FC = () => {
     const [isHashing, setIsHashing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [detectedType, setDetectedType] = useState('Desconocido');
+    const [isSecureContext, setIsSecureContext] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Verificar si crypto.subtle está disponible (Requiere HTTPS o localhost)
+    useEffect(() => {
+        if (!window.crypto || !window.crypto.subtle) {
+            setIsSecureContext(false);
+            setError("La API de criptografía segura no está disponible. Asegúrate de usar HTTPS o localhost.");
+        }
+    }, []);
 
     const clearHashes = () => {
         setMd5('');
@@ -53,11 +65,16 @@ const HashGenerator: React.FC = () => {
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
+        // Re-verificar contexto seguro
+        if (!window.crypto || !window.crypto.subtle) {
+             setError("La API de criptografía segura no está disponible.");
+        }
     }, []);
 
-    // Efecto para el hash de texto y detección de tipo
+    // Efecto para el hash de texto
     useEffect(() => {
-        setError(null);
+        if (!isSecureContext) return;
+
         setDetectedType(detectHashType(input));
         
         if (file || input.trim() === '') {
@@ -67,7 +84,9 @@ const HashGenerator: React.FC = () => {
 
         const calculateTextHashes = async () => {
             setIsHashing(true);
+            setError(null);
             try {
+                // MD5 usa CryptoJS (no nativo)
                 setMd5(CryptoJS.MD5(input).toString());
                 
                 const encoder = new TextEncoder();
@@ -93,13 +112,19 @@ const HashGenerator: React.FC = () => {
         
         const handler = setTimeout(calculateTextHashes, 250);
         return () => clearTimeout(handler);
-    }, [input, file]);
+    }, [input, file, isSecureContext]);
 
     // Efecto para el hash de archivos
     useEffect(() => {
-        if (!file) return;
+        if (!file || !isSecureContext) return;
         
         setError(null);
+
+        if (file.size > MAX_FILE_SIZE) {
+            setError(`El archivo es demasiado grande (${(file.size / 1024 / 1024).toFixed(2)} MB). El límite del navegador es de 200 MB para evitar bloqueos.`);
+            clearHashes();
+            return;
+        }
 
         const calculateFileHashes = () => {
             setIsHashing(true);
@@ -112,6 +137,7 @@ const HashGenerator: React.FC = () => {
                     const arrayBuffer = event.target?.result as ArrayBuffer;
                     if (!arrayBuffer) throw new Error("No se pudo leer el archivo.");
 
+                    // MD5 con CryptoJS (lento para archivos grandes, pero aceptable para <200MB)
                     const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
                     setMd5(CryptoJS.MD5(wordArray).toString());
 
@@ -126,7 +152,7 @@ const HashGenerator: React.FC = () => {
                     setSha512(bufferToHex(hash512));
                 } catch (err) {
                     console.error("Error al generar hash del archivo:", err);
-                    setError("Error al procesar el archivo. Puede que sea demasiado grande o esté corrupto.");
+                    setError("Error al procesar el archivo. Puede estar corrupto o el navegador limitó la memoria.");
                     clearHashes();
                 } finally {
                     setIsHashing(false);
@@ -140,11 +166,12 @@ const HashGenerator: React.FC = () => {
                 setIsHashing(false);
             };
 
+            // Leer como ArrayBuffer
             reader.readAsArrayBuffer(file);
         };
 
         calculateFileHashes();
-    }, [file]);
+    }, [file, isSecureContext]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setInput(e.target.value);
@@ -177,6 +204,12 @@ const HashGenerator: React.FC = () => {
 
     return (
         <div className="space-y-6">
+            {!isSecureContext && (
+                <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 dark:text-red-300 p-4 rounded-lg text-center">
+                    ⚠️ <strong>Atención:</strong> Las funciones de criptografía segura (SHA) requieren que la página se sirva a través de HTTPS o localhost. Actualmente algunas funciones están deshabilitadas.
+                </div>
+            )}
+
             <TextareaGroup
                 id="hash-input"
                 label="Entrada de Texto"
@@ -184,23 +217,27 @@ const HashGenerator: React.FC = () => {
                 onChange={handleInputChange}
                 placeholder="Escribe texto aquí o selecciona un archivo abajo..."
                 rows={5}
-                disabled={!!file}
+                disabled={!!file || !isSecureContext}
             />
 
             <div className="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 text-center">
-                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" disabled={!isSecureContext} />
                 {!file ? (
                     <>
                         <p className="text-slate-500 dark:text-slate-400 mb-2 text-sm">o</p>
-                        <button onClick={handleFileButtonClick} className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-md transition-colors duration-200">
-                            Seleccionar un Archivo
+                        <button 
+                            onClick={handleFileButtonClick} 
+                            disabled={!isSecureContext}
+                            className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Seleccionar un Archivo (Máx 200MB)
                         </button>
                     </>
                 ) : (
                     <div className="text-left text-sm flex items-center justify-between">
                         <div>
                             <p className="font-semibold text-slate-800 dark:text-slate-200">{file.name}</p>
-                            <p className="text-slate-500 dark:text-slate-400">{(file.size / 1024).toFixed(2)} KB</p>
+                            <p className="text-slate-500 dark:text-slate-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                         </div>
                         <button onClick={clearFile} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-semibold text-sm">
                             Quitar

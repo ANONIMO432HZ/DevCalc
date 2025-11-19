@@ -1,144 +1,122 @@
-# DevCalc: Calculadoras de Programación
+# DevSuite: Herramientas Digitales Integrales
 
-![Licencia](https://img.shields.io/badge/license-GPLv3-blue.svg)
+![PWA Ready](https://img.shields.io/badge/PWA-Ready-purple.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![React](https://img.shields.io/badge/React-18-cyan.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)
 
-**DevCalc** es una colección de calculadoras y herramientas para desarrolladores, diseñada para ser rápida, intuitiva y estéticamente agradable. Incluye utilidades esenciales como conversores de bases numéricas, formateadores de JSON, generadores de hash y mucho más.
+**DevSuite** es una "navaja suiza" digital para desarrolladores y creativos. Una aplicación web progresiva (PWA) que reúne herramientas de conversión, criptografía, diseño y manipulación de datos en una interfaz moderna, rápida y capaz de funcionar sin conexión.
 
-Visite [DevCalc](https://devcalc-flame.vercel.app/) no se necesita login y es totalmente freemium.
+[Ver Demo en Vivo](https://devsuite.vercel.app/) *(Enlace de ejemplo)*
 
 ---
 
-## 📸 Capturas de Pantalla
+## 🚀 Características Principales
 
-<table>
-  <tr>
-    <td align="center"><strong>Página de Bienvenida</strong></td>
-    <td align="center"><strong>Conversor de Bases</strong></td>
-  </tr>
-  <tr>
-    <td><img src="docs/images/welcome-page.png" alt="Página de Bienvenida de DevCalc"></td>
-    <td><img src="docs/images/base-converter.png" alt="Herramienta de Conversión de Bases"></td>
-  </tr>
-  <tr>
-    <td align="center"><strong>Conversor de Tiempo</strong></td>
-    <td align="center"><strong>Generador de Hash</strong></td>
-  </tr>
-  <tr>
-    <td><img src="docs/images/time-converter.png" alt="Herramienta de Conversión de Tiempo"></td>
-    <td><img src="docs/images/hash-generator.png" alt="Herramienta de Generación de Hash"></td>
-  </tr>
-</table>
+### 📱 Progressive Web App (PWA)
+DevSuite es instalable. Puedes añadirla a tu pantalla de inicio en móvil o escritorio y usarla **100% Offline**. No requiere internet para realizar cálculos o conversiones una vez cargada.
 
-## ✨ Características
+### 📜 Historial de Cálculos
+Nunca pierdas un resultado. DevSuite incluye un panel lateral de historial persistente que guarda tus conversiones, hashes y paletas generadas automáticamente o bajo demanda.
 
--   **Interfaz Moderna y Responsiva**: Un diseño limpio y adaptable a cualquier dispositivo, con modo claro y oscuro.
--   **Rendimiento**: Construido con tecnologías modernas para una experiencia de usuario fluida y sin recargas de página.
--   **Cero Dependencias Externas en Producción**: La aplicación es un único bundle de JavaScript, optimizado para una carga rápida.
+### 🎨 Diseño y UX
+-   **Tema Oscuro/Claro**: Detección automática y cambio manual.
+-   **Interfaz Reactiva**: Cálculos en tiempo real mientras escribes.
+-   **Dashboard**: Pantalla de bienvenida con acceso rápido a todas las herramientas.
 
-### Herramientas Incluidas
+---
 
-*   ✅ **Conversor de Bases:** Convierte entre texto (UTF-8), Base64, Hexadecimal (bytes), y representaciones numéricas (decimal, binario, hexadecimal). Incluye un conversor de unidades de almacenamiento (Bytes, KB, MB, GB, etc.).
-*   ✅ **Conversor de Tiempo:** Realiza conversiones entre diversas unidades de tiempo, desde nanosegundos hasta siglos.
-*   ✅ **Tiempo Unix:** Convierte timestamps de Unix a fechas legibles (GMT y local) y viceversa. Permite seleccionar fechas y obtener el timestamp correspondiente.
-*   ✅ **Codificador URL:** Codifica y decodifica texto para que sea seguro de usar en URLs (`encodeURIComponent` / `decodeURIComponent`).
-*   ✅ **Formateador JSON:** Valida, formatea (pretty-print) y minifica datos JSON. Muestra errores detallados con número de línea y columna.
-*   ✅ **Generador de Hash:** Calcula hashes (MD5, SHA-1, SHA-26, SHA-512) para entradas de texto o archivos locales de forma segura en el navegador.
-*   ✅ **Generador UUID:** Crea identificadores únicos universales (UUIDs) en sus versiones v1 (basado en tiempo) y v4 (aleatorio).
+## 🛠️ Herramientas Incluidas
 
-## 🛠️ Stack Tecnológico
+### 1. Conversor Universal
+Unificación de conversores físicos y temporales.
+-   **Categorías:** Longitud, Masa/Peso, Volumen, Área, Velocidad y Tiempo.
+-   **Reactividad:** Convierte entre todas las unidades simultáneamente (ej. escribe en Metros, obten Pies, Pulgadas y Millas al instante).
+-   **Precisión:** Manejo de notación científica para valores muy grandes o pequeños.
 
--   **Frontend:** [React](https://react.dev/) y [TypeScript](https://www.typescriptlang.org/)
+### 2. Conversor de Datos (JSON/YAML/TOML)
+-   **Formatos:** Conversión bidireccional entre JSON, YAML y TOML.
+-   **Editor:** Validación de sintaxis en tiempo real.
+-   **Utilidades:** Minificado, embellecido (Pretty Print), descodificación de strings JSON escapados.
+-   **Archivos:** Importación y exportación de archivos `.json`, `.yaml`, `.toml`.
+
+### 3. Lógica Bitwise
+Visualizador de operaciones a nivel de bits para programación de bajo nivel.
+-   **Operaciones:** AND, OR, XOR, NOT, NAND, NOR, XNOR, Shifts (<<, >>, >>>).
+-   **Visualización:** Representación binaria de 32 bits desglosada en nibbles.
+-   **Entrada:** Soporta Decimal, Hexadecimal (`0x`) y Binario (`0b`).
+
+### 4. Paletas y Colores
+Suite de diseño para crear esquemas de color.
+-   **Generador:** Armonías (Análoga, Monocromática, Complementaria, Triada, etc.).
+-   **Edición:** Sliders visuales RGB y HSL.
+-   **Psicología:** Presets de color basados en emociones (Confianza, Energía, Lujo...).
+-   **Gradientes:** Generador de código CSS para degradados lineales y radiales.
+-   **Exportación:** Copia como Variables CSS o JSON.
+
+### 5. Conversor de Bases Numéricas
+-   **Formatos:** Decimal, Binario, Hexadecimal.
+-   **Texto/Bytes:** Conversión de Texto UTF-8 a Hex Bytes, Base64 y ASCII.
+-   **Unidades Digitales:** Conversor de Bytes a KB, MB, GB, TB, PB.
+
+### 6. Criptografía (Hash)
+-   **Algoritmos:** MD5, SHA-1, SHA-256, SHA-512.
+-   **Archivos:** Generación de hash para archivos locales (hasta 200MB) sin subirlos a ningún servidor.
+-   **Seguridad:** Uso de la Web Crypto API nativa del navegador.
+
+### 7. Utilidades Varias
+-   **Tiempo Unix:** Timestamp actual, conversor de fechas Local/GMT y fechas relativas.
+-   **UUID:** Generador de UUID v4 (Aleatorio) y v1 (Tiempo).
+-   **URL Encoder:** Codificación y decodificación segura de URIs.
+
+---
+
+## 💻 Stack Tecnológico
+
+-   **Frontend:** [React 18](https://react.dev/)
+-   **Lenguaje:** [TypeScript](https://www.typescriptlang.org/)
 -   **Estilos:** [Tailwind CSS](https://tailwindcss.com/)
--   **Build Tool:** [esbuild](https://esbuild.github.io/) (para un empaquetado ultra rápido)
+-   **Empaquetado:** [Esbuild](https://esbuild.github.io/)
+-   **Parsers:** `js-yaml`, `smol-toml`, `crypto-js`.
 
 ---
 
-## 🚀 Puesta en Marcha (Desarrollo Local)
-
-Sigue estos pasos para configurar y ejecutar el proyecto en tu máquina local.
-
-### Prerrequisitos
-
--   [Node.js](https://nodejs.org/) (versión 18 o superior)
--   [npm](https://www.npmjs.com/) o un gestor de paquetes compatible (yarn, pnpm)
-
-### Instalación
+## ⚙️ Instalación Local
 
 1.  **Clona el repositorio:**
     ```bash
-    git clone https://github.com/TU_USUARIO/devcalc.git
-    cd devcalc
+    git clone https://github.com/ANONIMO432HZ/devsuite.git
+    cd devsuite
     ```
 
-2.  **Instala las dependencias:**
+2.  **Instala dependencias:**
     ```bash
     npm install
     ```
 
-### Ejecutar el Servidor de Desarrollo
+3.  **Inicia en modo desarrollo:**
+    ```bash
+    npm run dev
+    ```
+    Abre `http://127.0.0.1:8000` en tu navegador.
 
-Para iniciar el servidor de desarrollo con recarga en vivo, ejecuta:
-
-```bash
-npm run dev
-```
-
-Esto iniciará un servidor local (generalmente en `http://127.0.0.1:8000`) y abrirá la aplicación en tu navegador. `esbuild` recompilará automáticamente los archivos cuando detecte cambios.
-
-## 📦 Proceso de Build
-
-Para crear una versión optimizada para producción, utiliza el siguiente comando:
-
-```bash
-npm run build
-```
-
-Este comando utiliza `esbuild` para transpilar el código TypeScript/JSX, empaquetarlo en un único archivo JavaScript (`public/dist/bundle.js`) y minificarlo para obtener el mejor rendimiento.
-
-El resultado es un conjunto de archivos estáticos en el directorio `public` que se pueden desplegar en cualquier servicio de hosting.
+4.  **Construir para Producción:**
+    ```bash
+    npm run build
+    ```
+    Esto generará una carpeta `public/` con todos los archivos estáticos, iconos y el Service Worker listos para desplegar.
 
 ---
-
-## 🌐 Despliegue
-
-DevCalc está diseñado para ser desplegado fácilmente como un sitio estático.
-
-### Vercel (Recomendado)
-
-1.  Haz un fork de este repositorio en tu cuenta de GitHub.
-2.  Ve a tu [Dashboard de Vercel](https://vercel.com/dashboard) y haz clic en "Add New... -> Project".
-3.  Importa el repositorio que acabas de "forkear".
-4.  Vercel detectará la configuración del proyecto y la compilará automáticamente. Con los cambios recientes, no deberías necesitar cambiar ninguna configuración.
-5.  Haz clic en "Deploy". ¡Y listo! Tu aplicación estará en línea en segundos.
-
-### Alternativas
-
-#### Netlify
-
-El proceso es muy similar a Vercel. Puedes conectar tu repositorio de GitHub y Netlify se encargará del resto.
--   **Build Command:** `npm run build`
--   **Publish directory:** `public`
-
-#### Hosting Estático (GitHub Pages, AWS S3, etc.)
-
-1.  Ejecuta el comando `npm run build` localmente.
-2.  Sube el contenido del directorio `public` a tu proveedor de hosting.
-
-Asegúrate de que tu servidor esté configurado para servir `index.html` como la página de entrada.
 
 ## 🤝 Contribuciones
 
-¡Las contribuciones son bienvenidas! Si tienes ideas para nuevas herramientas, mejoras de rendimiento o correcciones de errores, por favor:
-
-1.  Haz un "Fork" del proyecto.
-2.  Crea una nueva rama (`git checkout -b feature/nueva-herramienta`).
-3.  Realiza tus cambios y haz "Commit" (`git commit -m 'Añade nueva-herramienta'`).
-4.  Haz "Push" a tu rama (`git push origin feature/nueva-herramienta`).
-5.  Abre un "Pull Request".
-
-## 📜 Licencia
-
-Este proyecto está bajo la Licencia Pública General de GNU v3.0. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+¡Las contribuciones son bienvenidas!
+1.  Haz un Fork.
+2.  Crea tu rama (`git checkout -b feature/amazing-feature`).
+3.  Haz Commit (`git commit -m 'Add some amazing feature'`).
+4.  Haz Push (`git push origin feature/amazing-feature`).
+5.  Abre un Pull Request.
 
 ---
-Creado con ❤️ y mucho ☕ por [ANONIMO432HZ](https://github.com/ANONIMO432HZ)
+
+**Creado por [4N0N1M0](https://github.com/ANONIMO432HZ)**

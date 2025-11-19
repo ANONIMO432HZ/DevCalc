@@ -1,5 +1,5 @@
 {
-  "name": "DevCalc: Calculadoras de Programación",
-  "description": "Una colección de calculadoras y herramientas para desarrolladores, incluyendo conversores de base numérica (binario, hexadecimal, decimal) y codificador/decodificador de Base64. Diseñado para ser rápido, intuitivo y estéticamente agradable.",
+  "name": "DevSuite: Herramientas Digitales Integrales",
+  "description": "Una suite completa de utilidades para desarrolladores y creativos. Incluye conversión universal de unidades, manipulación de datos (JSON/YAML), criptografía, herramientas de color y diseño, todo en una interfaz rápida y moderna.",
   "requestFramePermissions": []
 }
