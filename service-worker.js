@@ -1,10 +1,11 @@
-const CACHE_NAME = 'devsuite-v7';
+const CACHE_NAME = 'devsuite-v9';
 // IMPORTANTE: Solo cacheamos archivos locales. 
-// Las CDNs externas (Tailwind, React) provocan errores CORS que rompen la instalación de la PWA.
+// Ahora incluimos styles.css compilado en lugar de depender de CDNs externos.
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/dist/bundle.js',
+  '/dist/styles.css',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
@@ -14,7 +15,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Cacheando archivos locales v7');
+      console.log('[Service Worker] Cacheando archivos locales v9');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
@@ -39,7 +40,7 @@ self.addEventListener('activate', (event) => {
 });
 
 // Fetch: Estrategia Network First con fallback a Cache
-// Usamos Network First para asegurar que las CDNs carguen si hay internet
+// Usamos Network First para asegurar que las actualizaciones lleguen rápido
 self.addEventListener('fetch', (event) => {
   // Solo interceptamos peticiones GET
   if (event.request.method !== 'GET') return;
