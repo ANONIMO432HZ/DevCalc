@@ -1,4 +1,4 @@
-const CACHE_NAME = 'devsuite-v6';
+const CACHE_NAME = 'devsuite-v7';
 // IMPORTANTE: Solo cacheamos archivos locales. 
 // Las CDNs externas (Tailwind, React) provocan errores CORS que rompen la instalación de la PWA.
 const ASSETS_TO_CACHE = [
@@ -14,7 +14,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Cacheando archivos locales v6');
+      console.log('[Service Worker] Cacheando archivos locales v7');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
