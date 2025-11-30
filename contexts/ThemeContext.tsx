@@ -42,18 +42,6 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Helper para convertir HEX a RGB "r g b" para Tailwind
-const hexToRgbString = (hex: string): string => {
-    // Expandir shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
-  
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if (!result) return '132 204 22'; // Default Lime fallback
-    
-    return `${parseInt(result[1], 16)} ${parseInt(result[2], 16)} ${parseInt(result[3], 16)}`;
-};
-
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
   // Default to 'tools' (Multicolor)
@@ -102,15 +90,31 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [overrideAccentColor, accentPreset, customAccentColor]);
   
   useEffect(() => {
-    // Si accentPreset es 'tools', el override se encarga.
-    // Si no, convertimos el effectiveAccentColor a RGB y lo seteamos.
-    // Ignoramos gradientes complejos, asumimos colores sólidos para la variable CSS principal.
-    
     let colorToConvert = effectiveAccentColor;
     if (colorToConvert === 'tools') colorToConvert = '#84cc16'; // Fallback
     
-    const rgbString = hexToRgbString(colorToConvert);
-    document.documentElement.style.setProperty('--color-accent', rgbString);
+    // Convertir HEX a canales RGB
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    const hex = colorToConvert.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    
+    if (result) {
+        const r = parseInt(result[1], 16);
+        const g = parseInt(result[2], 16);
+        const b = parseInt(result[3], 16);
+        
+        // 1. Variable para Tailwind (solo números, permite opacidad)
+        // Uso: bg-[rgb(var(--color-accent-rgb)/0.5)] o configurado en tailwind.config
+        document.documentElement.style.setProperty('--color-accent-rgb', `${r} ${g} ${b}`);
+        
+        // 2. Variable estándar (Color válido CSS)
+        // Uso: color: var(--color-accent)
+        document.documentElement.style.setProperty('--color-accent', `rgb(${r}, ${g}, ${b})`);
+    } else {
+        // Fallback
+        document.documentElement.style.setProperty('--color-accent-rgb', '132 204 22');
+        document.documentElement.style.setProperty('--color-accent', '#84cc16');
+    }
   }, [effectiveAccentColor]);
 
   const toggleTheme = () => {

@@ -87,7 +87,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+          <div className="px-6 py-6 max-h-[70vh] overflow-y-auto scrollbar-custom">
             
             {/* --- INTERFAZ --- */}
             <SectionTitle>{t('settings.general')}</SectionTitle>

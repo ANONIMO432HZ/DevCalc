@@ -1,3 +1,4 @@
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -11,7 +12,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        accent: 'var(--color-accent)',
+        // Usamos una variable separada para los canales RGB para permitir opacidad en Tailwind (ej: bg-accent/20)
+        accent: 'rgb(var(--color-accent-rgb) / <alpha-value>)',
       },
       keyframes: {
         fadeIn: {

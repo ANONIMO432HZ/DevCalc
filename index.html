@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es" class="">
 <head>
@@ -35,7 +36,10 @@
             var r = parseInt(result[1], 16);
             var g = parseInt(result[2], 16);
             var b = parseInt(result[3], 16);
-            document.documentElement.style.setProperty('--color-accent', r + ' ' + g + ' ' + b);
+            // Variable para Tailwind (solo números)
+            document.documentElement.style.setProperty('--color-accent-rgb', r + ' ' + g + ' ' + b);
+            // Variable para CSS estándar (color válido)
+            document.documentElement.style.setProperty('--color-accent', 'rgb(' + r + ',' + g + ',' + b + ')');
          }
       }
     })();
