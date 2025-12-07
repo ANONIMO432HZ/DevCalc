@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -10,8 +9,10 @@ import { HistoryProvider } from './contexts/HistoryContext';
 import { ApiKeyProvider } from './contexts/ApiKeyContext';
 
 // Polyfill for process.env if it doesn't exist (prevents crash in browser)
-if (typeof process === 'undefined') {
-  (window as any).process = { env: {} };
+// Accedemos a través de 'window' casteado a 'any' para evitar errores de TypeScript (TS2304)
+const win = window as any;
+if (typeof win.process === 'undefined') {
+  win.process = { env: {} };
 }
 
 const rootElement = document.getElementById('root');

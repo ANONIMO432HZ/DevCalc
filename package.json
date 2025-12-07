@@ -4,8 +4,8 @@
   "description": "Una suite integral de herramientas para desarrolladores y creativos, diseñada para ser rápida, intuitiva y estéticamente agradable.",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "build:css": "tailwindcss -i ./src/input.css -o ./public/styles.css --minify",
-    "watch:css": "tailwindcss -i ./src/input.css -o ./public/styles.css --watch",
+    "build:css": "tailwindcss -i ./input.css -o ./public/styles.css --minify",
+    "watch:css": "tailwindcss -i ./input.css -o ./public/styles.css --watch",
     "prepare-public": "node -e \"const fs = require('fs'); if (fs.existsSync('public')) fs.rmSync('public', { recursive: true, force: true }); fs.mkdirSync('public/dist', { recursive: true }); fs.mkdirSync('public/icons', { recursive: true }); fs.copyFileSync('index.html', 'public/index.html'); fs.copyFileSync('manifest.json', 'public/manifest.json'); fs.copyFileSync('service-worker.js', 'public/service-worker.js'); try { fs.cpSync('icons', 'public/icons', { recursive: true }); } catch (e) {} \"",
     "dev": "npm run prepare-public && npm run build:css && esbuild index.tsx --bundle --splitting --format=esm --outdir=public/dist --servedir=public --port=8000 & npm run watch:css",
     "build": "npm run prepare-public && npm run build:css && esbuild index.tsx --bundle --splitting --format=esm --outdir=public/dist --minify --jsx=automatic"
