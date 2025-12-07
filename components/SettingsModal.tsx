@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useApiKey } from '../contexts/ApiKeyContext';
 import { CalculatorType } from '../types';
 
 interface SettingsModalProps {
@@ -21,6 +22,25 @@ const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
+const EyeIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    </svg>
+);
+
+const EyeOffIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+    </svg>
+);
+
+const KeyIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+    </svg>
+);
+
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 mt-4 first:mt-0 px-1">
         {children}
@@ -30,9 +50,10 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 const SettingRow: React.FC<{ 
     label: string; 
     desc?: string; 
-    children: React.ReactNode 
-}> = ({ label, desc, children }) => (
-    <div className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+    children: React.ReactNode;
+    className?: string;
+}> = ({ label, desc, children, className = "" }) => (
+    <div className={`flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-700/50 last:border-0 ${className}`}>
         <div className="flex flex-col pr-4">
             <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{label}</span>
             {desc && <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{desc}</span>}
@@ -65,6 +86,8 @@ const Switch: React.FC<{ checked: boolean; onChange: (val: boolean) => void }> =
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const { settings, updateSetting, resetAllData } = useSettings();
   const { language, setLanguage, t } = useLanguage();
+  const { apiKey, setApiKey } = useApiKey();
+  const [showKey, setShowKey] = useState(false);
 
   if (!isOpen) return null;
 
@@ -89,6 +112,42 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
           <div className="px-6 py-6 max-h-[70vh] overflow-y-auto scrollbar-custom">
             
+            {/* --- GOOGLE GEMINI API KEY --- */}
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4 border border-indigo-100 dark:border-indigo-900/30 mb-6">
+                <div className="flex items-center gap-2 mb-2">
+                    <KeyIcon className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+                    <h4 className="text-sm font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wide">Google Gemini API</h4>
+                </div>
+                <p className="text-xs text-indigo-600 dark:text-indigo-300 mb-3 leading-relaxed">
+                    Para usar las funciones de IA, es necesario ingresar tu propia API Key. Se guardará de forma segura <strong>solo en tu navegador</strong>.
+                </p>
+                <div className="relative">
+                    <input 
+                        type={showKey ? "text" : "password"}
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        placeholder="Pegar API Key aquí (AIza...)"
+                        className="w-full bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800 rounded-md py-2 pl-3 pr-10 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700 dark:text-slate-200"
+                    />
+                    <button 
+                        onClick={() => setShowKey(!showKey)} 
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500"
+                    >
+                        {showKey ? <EyeOffIcon className="w-4 h-4"/> : <EyeIcon className="w-4 h-4"/>}
+                    </button>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-[10px] text-indigo-500 hover:underline font-bold">
+                        Obtener API Key Gratis
+                    </a>
+                    {apiKey && (
+                        <button onClick={() => setApiKey('')} className="text-[10px] text-red-500 hover:underline">
+                            Borrar Key
+                        </button>
+                    )}
+                </div>
+            </div>
+
             {/* --- INTERFAZ --- */}
             <SectionTitle>{t('settings.general')}</SectionTitle>
             

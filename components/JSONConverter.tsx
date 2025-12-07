@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef } from 'react';
 import TextareaGroup from './TextareaGroup';
 import * as yaml from 'js-yaml';
@@ -128,8 +127,9 @@ const JSONConverter: React.FC = () => {
     <div className="space-y-6">
       <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json,.yaml,.yml,.toml,.txt" className="hidden" />
 
-      <div className="flex flex-col xl:flex-row gap-4 justify-between items-end xl:items-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-         <div className="flex flex-wrap gap-3 w-full xl:w-auto items-center">
+      <div className="flex flex-col lg:flex-row flex-wrap justify-center items-center gap-x-6 gap-y-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+         {/* Grupo 1: Controles de Archivo */}
+         <div className="flex flex-wrap justify-center items-center gap-3">
             <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 py-2 px-4 rounded-md transition-colors border border-slate-300 dark:border-slate-600 shadow-sm text-sm">
                 <UploadIcon className="w-5 h-5" /> <span className="hidden sm:inline">{t('json.importBtn')}</span>
             </button>
@@ -140,7 +140,7 @@ const JSONConverter: React.FC = () => {
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500"><ChevronDownIcon className="w-4 h-4" /></div>
             </div>
-            <div className="flex items-center relative flex-grow md:flex-grow-0">
+            <div className="flex items-center relative">
                 <input type="text" value={fileName} onChange={(e) => setFileName(e.target.value)} placeholder={t('json.fileName')} className="w-full md:w-32 lg:w-40 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-l-md py-2 px-3 focus:ring-2 focus:ring-accent outline-none transition text-sm"/>
                 <button onClick={handleExportClick} disabled={!inputData.trim()} className="bg-accent hover:opacity-90 text-white py-2 px-3 rounded-r-md transition-colors shadow-sm disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center">
                     <DownloadIcon className="w-5 h-5" />
@@ -148,8 +148,12 @@ const JSONConverter: React.FC = () => {
             </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 justify-end w-full xl:w-auto items-center">
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase mr-1 hidden xl:inline">{t('json.convertPrefix')}</span>
+        {/* Separador visual */}
+        <div className="w-full lg:w-px lg:h-8 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+
+        {/* Grupo 2: Controles de Acción */}
+        <div className="flex flex-wrap justify-center items-center gap-2">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase mr-1 hidden md:inline">{t('json.convertPrefix')}</span>
             <div className="flex bg-slate-200 dark:bg-slate-700 rounded-md p-1 gap-1">
                 {['json', 'yaml', 'toml'].map(fmt => (
                     <button key={fmt} onClick={() => handleConvert(fmt as DataFormat)} disabled={!inputData.trim()} className="px-3 py-1.5 text-sm font-medium rounded bg-white dark:bg-slate-600 text-slate-700 dark:text-slate-200 shadow-sm hover:text-accent disabled:opacity-50 transition-all">
@@ -157,7 +161,7 @@ const JSONConverter: React.FC = () => {
                     </button>
                 ))}
             </div>
-            <button onClick={handleUnescape} disabled={!inputData.trim()} className="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-md hover:bg-amber-200 transition-colors disabled:opacity-50"><MagicIcon className="w-5 h-5" /></button>
+            <button onClick={handleUnescape} disabled={!inputData.trim()} className="p-2 bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-md hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors disabled:opacity-50"><MagicIcon className="w-5 h-5" /></button>
             <button onClick={clearAll} className="px-3 py-2 text-sm bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-md transition-colors">{t('action.clear')}</button>
         </div>
       </div>

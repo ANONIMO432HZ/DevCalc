@@ -134,11 +134,11 @@ const TextTools: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-4 flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700 pt-4">
-        <button onClick={handleSave} disabled={!output} className="bg-accent hover:opacity-90 text-white font-semibold py-2 px-6 rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+      <div className="mt-4 flex flex-col sm:flex-row sm:justify-end gap-3 border-t border-slate-200 dark:border-slate-700 pt-4">
+        <button onClick={handleSave} disabled={!output} className="w-full sm:w-auto bg-accent hover:opacity-90 text-white font-semibold py-2 px-6 rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
           {t('action.save')}
         </button>
-        <button onClick={handleClear} className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold py-2 px-6 rounded-md transition-colors duration-200">
+        <button onClick={handleClear} className="w-full sm:w-auto bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold py-2 px-6 rounded-md transition-colors duration-200">
           {t('action.clear')}
         </button>
       </div>

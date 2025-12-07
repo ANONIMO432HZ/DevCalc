@@ -21,7 +21,8 @@ const Icons = {
   Heart: (props: any) => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>),
   Globe: (props: any) => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>),
   Sparkles: (props: any) => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>),
-  Health: (props: any) => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>) // Using Heart as placeholder, can be customized
+  Health: (props: any) => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>),
+  ChartBar: (props: any) => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>)
 };
 
 const FeatureCard: React.FC<{
@@ -31,38 +32,44 @@ const FeatureCard: React.FC<{
   tags: string[];
   onClick: () => void;
   fullWidth?: boolean;
-}> = ({ title, description, icon: Icon, tags, onClick, fullWidth }) => (
+}> = ({ title, description, icon: Icon, tags, onClick, fullWidth }) => {
+  const [mainTitle, subtitle] = title.split(' (');
+  
+  return (
   <button
     onClick={onClick}
-    className={`group relative flex flex-col text-left bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 hover:shadow-xl hover:ring-2 hover:ring-accent hover:border-transparent transition-all duration-300 hover:-translate-y-1 ${fullWidth ? 'md:col-span-2' : ''}`}
+    className={`group relative flex items-start gap-4 text-left bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 hover:shadow-xl hover:ring-2 hover:ring-accent hover:border-transparent transition-all duration-300 hover:-translate-y-1 h-full ${fullWidth ? 'md:col-span-2' : ''}`}
   >
-    <div className="flex items-start gap-5 h-full w-full">
-        {/* Contenedor del Icono */}
-        <div className="shrink-0 p-5 rounded-2xl bg-accent/10 dark:bg-accent/20 text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300 group-hover:scale-110">
-            <Icon className="w-10 h-10" />
-        </div>
+    {/* Icon */}
+    <div className="shrink-0 p-4 rounded-2xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white dark:bg-accent/20 transition-colors duration-300">
+        <Icon className="w-8 h-8 sm:w-10 sm:h-10" />
+    </div>
 
-        <div className="flex flex-col h-full w-full">
-            <div>
-                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-accent transition-colors">
-                    {title}
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                    {description}
-                </p>
-            </div>
-            
-            <div className="mt-auto pt-4 flex flex-wrap gap-2">
-                {tags.map(tag => (
-                    <span key={tag} className="text-[10px] font-mono uppercase tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-600">
-                        {tag}
-                    </span>
-                ))}
-            </div>
+    {/* Content */}
+    <div className="flex flex-col h-full w-full">
+        {/* Title & Subtitle */}
+        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight">
+            {mainTitle}
+            {subtitle && <span className="block text-sm font-medium text-slate-500 dark:text-slate-400 font-normal mt-0.5">({subtitle}</span>}
+        </h3>
+
+        {/* Description */}
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed flex-grow">
+            {description}
+        </p>
+        
+        {/* Tags */}
+        <div className="mt-3 pt-1 flex flex-wrap gap-2">
+            {tags.map(tag => (
+                <span key={tag} className="text-[10px] font-mono uppercase tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-600">
+                    {tag}
+                </span>
+            ))}
         </div>
     </div>
   </button>
-);
+  );
+};
 
 const Welcome: React.FC<WelcomeProps> = ({ onNavigate }) => {
   const { t } = useLanguage();
@@ -89,12 +96,12 @@ const Welcome: React.FC<WelcomeProps> = ({ onNavigate }) => {
 
         {/* Inline Color Picker for Hero */}
         {accentPreset && (
-            <div className="flex justify-center items-center gap-4 animate-fadeIn mt-8">
+            <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 animate-fadeIn mt-6 sm:mt-8 px-2">
                  {Object.entries(ACCENT_PRESETS).map(([key, val]: any) => (
                     <button
                         key={key}
                         onClick={() => setAccentPreset(key)}
-                        className={`w-12 h-12 rounded-full ring-2 transition-all shadow-sm flex items-center justify-center ${
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ring-2 transition-all shadow-sm flex items-center justify-center ${
                             accentPreset === key 
                             ? `ring-offset-2 dark:ring-offset-slate-800 scale-110 ${key === 'tools' ? 'ring-slate-400 dark:ring-slate-500' : 'ring-accent'}` 
                             : 'ring-transparent hover:scale-110'
@@ -105,7 +112,7 @@ const Welcome: React.FC<WelcomeProps> = ({ onNavigate }) => {
                     >
                     </button>
                  ))}
-                 <div className={`relative w-12 h-12 rounded-full overflow-hidden shadow-sm ring-2 transition-all flex items-center justify-center ${accentPreset === 'custom' ? 'ring-accent ring-offset-2 dark:ring-offset-slate-800' : 'ring-transparent hover:scale-110 ring-1 ring-slate-300 dark:ring-slate-600'}`}>
+                 <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden shadow-sm ring-2 transition-all flex items-center justify-center ${accentPreset === 'custom' ? 'ring-accent ring-offset-2 dark:ring-offset-slate-800' : 'ring-transparent hover:scale-110 ring-1 ring-slate-300 dark:ring-slate-600'}`}>
                     <input type="color" value={customAccentColor} onChange={handleCustomColor} className="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] p-0 border-0 cursor-pointer" />
                  </div>
             </div>
@@ -114,18 +121,22 @@ const Welcome: React.FC<WelcomeProps> = ({ onNavigate }) => {
 
       {/* Grid de Herramientas Unificadas */}
       <div>
-        <div className="flex items-center gap-4 mb-6">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">{t('welcome.section.dev')}</h3>
-            <div className="h-px flex-grow bg-slate-200 dark:bg-slate-700"></div>
-        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <FeatureCard 
                 title={t('card.ai.title')}
                 description={t('card.ai.desc')}
                 icon={Icons.Sparkles}
-                tags={['Gemini 2.5', 'Regex', 'Code', 'Fix']}
+                tags={['Gemini', 'Code', 'Chat']}
                 onClick={() => onNavigate(CalculatorType.AiAssistant)}
+            />
+            
+            <FeatureCard 
+                title={t('card.diagram.title')}
+                description={t('card.diagram.desc')}
+                icon={Icons.ChartBar}
+                tags={['Mermaid', 'Flowchart', 'Offline', 'SVG']}
+                onClick={() => onNavigate(CalculatorType.DiagramEditor)}
             />
 
             <FeatureCard 
@@ -134,14 +145,6 @@ const Welcome: React.FC<WelcomeProps> = ({ onNavigate }) => {
                 icon={Icons.Scale}
                 tags={['Metros', 'Kilos', 'IMC', 'Tiempo']}
                 onClick={() => onNavigate(CalculatorType.UnitConverter)}
-            />
-            
-            <FeatureCard 
-                title={t('card.text.title')}
-                description={t('card.text.desc')}
-                icon={Icons.Link}
-                tags={['URL Encode', 'HTML Entities', 'ROT13']}
-                onClick={() => onNavigate(CalculatorType.NumberBase)}
             />
 
             <FeatureCard 
@@ -156,7 +159,7 @@ const Welcome: React.FC<WelcomeProps> = ({ onNavigate }) => {
                 title={t('card.base.title')}
                 description={t('card.base.desc')}
                 icon={Icons.Binary}
-                tags={['Binario', 'Hex', 'Base64', 'ASCII']}
+                tags={['Binario', 'Hex', 'Base64', 'URL']}
                 onClick={() => onNavigate(CalculatorType.NumberBase)}
             />
 

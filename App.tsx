@@ -14,9 +14,9 @@ import UnitConverter from './components/UnitConverter';
 import PaletteGenerator from './components/PaletteGenerator';
 import NetworkTools from './components/NetworkTools';
 import AiAssistant from './components/AiAssistant';
+import DiagramEditor from './components/DiagramEditor';
 import Footer from './components/Footer';
 import InstallButton from './components/InstallButton';
-import { HistoryProvider } from './contexts/HistoryContext';
 import HistoryDrawer from './components/HistoryDrawer';
 import { useNavigation } from './contexts/NavigationContext';
 import { useSettings } from './contexts/SettingsContext';
@@ -33,6 +33,7 @@ const App: React.FC = () => {
   const MAIN_TABS = [
     { id: CalculatorType.Welcome, label: t('menu.welcome') },
     { id: CalculatorType.AiAssistant, label: t('menu.aiAssistant') },
+    { id: CalculatorType.DiagramEditor, label: t('menu.diagramEditor') },
     { id: CalculatorType.UnitConverter, label: t('menu.unitConverter') },
     { id: CalculatorType.NumberBase, label: t('menu.numberBase') },
     { id: CalculatorType.BitwiseCalculator, label: t('menu.bitwiseCalculator') },
@@ -79,22 +80,25 @@ const App: React.FC = () => {
   }, [activeCalculator, isDirty, setIsDirty, settings.enableUnsavedWarning]);
 
   if (!activeCalculator) return null;
+  
+  const isDiagramEditor = activeCalculator === CalculatorType.DiagramEditor;
 
   return (
-    <HistoryProvider>
+    <>
       <div className="flex flex-col min-h-screen font-sans">
         <Header />
         <HistoryDrawer />
-        <main className="flex-grow w-full max-w-5xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-700">
+        <main className={`flex-grow w-full ${isDiagramEditor ? 'max-w-7xl' : 'max-w-5xl'} mx-auto px-4 py-4 sm:px-6 lg:px-8`}>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-700 h-full flex flex-col">
             <Tabs 
                 tabs={MAIN_TABS} 
                 activeTab={activeCalculator} 
                 onTabChange={handleTabChange} 
             />
-            <div className={`${settings.compactMode ? 'p-4' : 'p-6 md:p-8'}`}>
+            <div className={`${settings.compactMode && !isDiagramEditor ? 'p-4' : 'p-6 md:p-8'} ${isDiagramEditor ? 'flex-grow flex flex-col' : ''}`}>
               {activeCalculator === CalculatorType.Welcome && <Welcome onNavigate={handleTabChange} />}
               {activeCalculator === CalculatorType.AiAssistant && <AiAssistant />}
+              {activeCalculator === CalculatorType.DiagramEditor && <DiagramEditor />}
               {activeCalculator === CalculatorType.UnitConverter && <UnitConverter />}
               {activeCalculator === CalculatorType.NumberBase && <NumberBaseConverter />}
               {activeCalculator === CalculatorType.BitwiseCalculator && <BitwiseCalculator />}
@@ -104,13 +108,14 @@ const App: React.FC = () => {
               {activeCalculator === CalculatorType.PaletteGenerator && <PaletteGenerator />}
               {activeCalculator === CalculatorType.UUIDGenerator && <UUIDGenerator />}
               {activeCalculator === CalculatorType.UnixTimestamp && <UnixTimestampConverter />}
+              {activeCalculator === CalculatorType.BMI && <UnitConverter initialCategory="bmi" />}
             </div>
           </div>
         </main>
         <Footer />
         <InstallButton />
       </div>
-    </HistoryProvider>
+    </>
   );
 };
 

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es" class="">
 <head>
@@ -6,7 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DevSuite: Herramientas Digitales Integrales</title>
   
+  <!-- SEO & Meta Tags -->
+  <meta name="description" content="Una suite completa de utilidades para desarrolladores y creativos. Conversión universal, criptografía, diseño, diagramas IA y manipulación de datos en una PWA offline.">
+  <meta name="keywords" content="dev tools, unit converter, json formatter, base64, hash generator, uuid, color palette, mermaid editor, ai assistant, pwa, offline">
+  <meta name="author" content="DevSuite Team">
   <meta name="theme-color" content="#0f172a">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dev-suite.vercel.app/">
+  <meta property="og:title" content="DevSuite: Herramientas Digitales Integrales">
+  <meta property="og:description" content="Conversión universal, criptografía, diseño y diagramas IA en una PWA offline.">
+  <meta property="og:image" content="/icons/icon-512.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://dev-suite.vercel.app/">
+  <meta property="twitter:title" content="DevSuite: Herramientas Digitales Integrales">
+  <meta property="twitter:description" content="Conversión universal, criptografía, diseño y diagramas IA en una PWA offline.">
+  <meta property="twitter:image" content="/icons/icon-512.png">
+
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -47,23 +65,23 @@
 <script type="importmap">
 {
   "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
     "js-yaml": "https://aistudiocdn.com/js-yaml@^4.1.1",
     "smol-toml": "https://aistudiocdn.com/smol-toml@^1.5.2",
     "crypto-js": "https://aistudiocdn.com/crypto-js@^4.2.0",
     "@noble/hashes/": "https://aistudiocdn.com/@noble/hashes@^2.0.1/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
     "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
-    "mermaid": "https://aistudiocdn.com/mermaid@^11.12.1"
+    "mermaid": "https://aistudiocdn.com/mermaid@^11.12.2"
   }
 }
 </script>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
   <div id="root"></div>
-  <script src="/dist/bundle.js"></script>
+  <script type="module" src="/dist/index.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

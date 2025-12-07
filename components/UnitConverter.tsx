@@ -8,7 +8,7 @@ import BMICalculator from './BMICalculator';
 
 // Definición de tipos para las unidades
 interface UnitDefinition {
-  name: string;
+  name: string; // Ahora contiene la clave de traducción
   multiplier: number;
 }
 
@@ -24,121 +24,134 @@ const CATEGORIES: Record<string, CategoryDefinition> = {
         labelKey: 'unit.category.length',
         baseUnit: 'm',
         units: {
-            nm: { name: 'Nanometers', multiplier: 1e-9 }, 
-            microns: { name: 'Micrometers', multiplier: 1e-6 },
-            mm: { name: 'Millimeters', multiplier: 0.001 },
-            cm: { name: 'Centimeters', multiplier: 0.01 },
-            m: { name: 'Meters', multiplier: 1 },
-            km: { name: 'Kilometers', multiplier: 1000 },
-            in: { name: 'Inches', multiplier: 0.0254 },
-            ft: { name: 'Feet', multiplier: 0.3048 },
-            yd: { name: 'Yards', multiplier: 0.9144 },
-            mi: { name: 'Miles', multiplier: 1609.344 },
-            nmi: { name: 'Nautical Miles', multiplier: 1852 },
+            nm: { name: 'unit.length.nm', multiplier: 1e-9 }, 
+            microns: { name: 'unit.length.microns', multiplier: 1e-6 },
+            mm: { name: 'unit.length.mm', multiplier: 0.001 },
+            cm: { name: 'unit.length.cm', multiplier: 0.01 },
+            m: { name: 'unit.length.m', multiplier: 1 },
+            km: { name: 'unit.length.km', multiplier: 1000 },
+            in: { name: 'unit.length.in', multiplier: 0.0254 },
+            ft: { name: 'unit.length.ft', multiplier: 0.3048 },
+            yd: { name: 'unit.length.yd', multiplier: 0.9144 },
+            mi: { name: 'unit.length.mi', multiplier: 1609.344 },
+            nmi: { name: 'unit.length.nmi', multiplier: 1852 },
+            px: { name: 'unit.length.px', multiplier: 0.0254 / 96 }, // 1 inch = 96px
         }
     },
     weight: {
         labelKey: 'unit.category.weight',
         baseUnit: 'g',
         units: {
-            mg: { name: 'Milligrams', multiplier: 0.001 },
-            g: { name: 'Grams', multiplier: 1 },
-            kg: { name: 'Kilograms', multiplier: 1000 },
-            t: { name: 'Metric Tonnes', multiplier: 1e6 },
-            oz: { name: 'Ounces', multiplier: 28.349523125 },
-            lb: { name: 'Pounds', multiplier: 453.59237 },
-            st: { name: 'Stones', multiplier: 6350.29318 },
+            mg: { name: 'unit.weight.mg', multiplier: 0.001 },
+            g: { name: 'unit.weight.g', multiplier: 1 },
+            kg: { name: 'unit.weight.kg', multiplier: 1000 },
+            t: { name: 'unit.weight.t', multiplier: 1e6 },
+            oz: { name: 'unit.weight.oz', multiplier: 28.349523125 },
+            lb: { name: 'unit.weight.lb', multiplier: 453.59237 },
+            st: { name: 'unit.weight.st', multiplier: 6350.29318 },
         }
     },
     volume: {
         labelKey: 'unit.category.volume',
         baseUnit: 'ml',
         units: {
-            ml: { name: 'Milliliters', multiplier: 1 },
-            cl: { name: 'Centiliters', multiplier: 10 },
-            l: { name: 'Liters', multiplier: 1000 },
-            m3: { name: 'Cubic Meters', multiplier: 1e6 },
-            tsp: { name: 'Teaspoons (US)', multiplier: 4.92892 },
-            tbsp: { name: 'Tablespoons (US)', multiplier: 14.7868 },
-            floz: { name: 'Fluid Ounces (US)', multiplier: 29.5735 },
-            cup: { name: 'Cups (US)', multiplier: 236.588 },
-            pt: { name: 'Pints (US)', multiplier: 473.176 },
-            qt: { name: 'Quarts (US)', multiplier: 946.353 },
-            gal: { name: 'Gallons (US)', multiplier: 3785.41 },
+            ml: { name: 'unit.vol.ml', multiplier: 1 },
+            cl: { name: 'unit.vol.cl', multiplier: 10 },
+            l: { name: 'unit.vol.l', multiplier: 1000 },
+            m3: { name: 'unit.vol.m3', multiplier: 1e6 },
+            tsp: { name: 'unit.vol.tsp', multiplier: 4.92892 },
+            tbsp: { name: 'unit.vol.tbsp', multiplier: 14.7868 },
+            floz: { name: 'unit.vol.floz', multiplier: 29.5735 },
+            cup: { name: 'unit.vol.cup', multiplier: 236.588 },
+            pt: { name: 'unit.vol.pt', multiplier: 473.176 },
+            qt: { name: 'unit.vol.qt', multiplier: 946.353 },
+            gal: { name: 'unit.vol.gal', multiplier: 3785.41 },
         }
     },
     area: {
         labelKey: 'unit.category.area',
         baseUnit: 'm2',
         units: {
-            cm2: { name: 'Sq Centimeters', multiplier: 0.0001 },
-            m2: { name: 'Sq Meters', multiplier: 1 },
-            ha: { name: 'Hectares', multiplier: 10000 },
-            km2: { name: 'Sq Kilometers', multiplier: 1e6 },
-            sqin: { name: 'Sq Inches', multiplier: 0.00064516 },
-            sqft: { name: 'Sq Feet', multiplier: 0.092903 },
-            ac: { name: 'Acres', multiplier: 4046.86 },
-            sqmi: { name: 'Sq Miles', multiplier: 2.59e6 },
+            cm2: { name: 'unit.area.cm2', multiplier: 0.0001 },
+            m2: { name: 'unit.area.m2', multiplier: 1 },
+            ha: { name: 'unit.area.ha', multiplier: 10000 },
+            km2: { name: 'unit.area.km2', multiplier: 1e6 },
+            sqin: { name: 'unit.area.sqin', multiplier: 0.00064516 },
+            sqft: { name: 'unit.area.sqft', multiplier: 0.092903 },
+            ac: { name: 'unit.area.ac', multiplier: 4046.86 },
+            sqmi: { name: 'unit.area.sqmi', multiplier: 2.59e6 },
         }
     },
     speed: {
         labelKey: 'unit.category.speed',
         baseUnit: 'm/s',
         units: {
-            mps: { name: 'Meters/s (m/s)', multiplier: 1 },
-            kph: { name: 'Kilometers/h (km/h)', multiplier: 0.277777778 },
-            mph: { name: 'Miles/h (mph)', multiplier: 0.44704 },
-            kn: { name: 'Knots (kn)', multiplier: 0.514444444 },
-            fps: { name: 'Feet/s (ft/s)', multiplier: 0.3048 },
-            mach: { name: 'Mach', multiplier: 340.29 },
-            c: { name: 'Light Speed', multiplier: 299792458 }
+            mps: { name: 'unit.speed.mps', multiplier: 1 },
+            kph: { name: 'unit.speed.kph', multiplier: 0.277777778 },
+            mph: { name: 'unit.speed.mph', multiplier: 0.44704 },
+            kn: { name: 'unit.speed.kn', multiplier: 0.514444444 },
+            fps: { name: 'unit.speed.fps', multiplier: 0.3048 },
+            mach: { name: 'unit.speed.mach', multiplier: 340.29 },
+            c: { name: 'unit.speed.c', multiplier: 299792458 }
         }
     },
     time: {
         labelKey: 'unit.category.time',
         baseUnit: 's',
         units: {
-            ns: { name: 'Nanoseconds', multiplier: 1e-9 },
-            microns: { name: 'Microseconds', multiplier: 1e-6 },
-            ms: { name: 'Milliseconds', multiplier: 0.001 },
-            s: { name: 'Seconds', multiplier: 1 },
-            min: { name: 'Minutes', multiplier: 60 },
-            h: { name: 'Hours', multiplier: 3600 },
-            d: { name: 'Days', multiplier: 86400 },
-            wk: { name: 'Weeks', multiplier: 604800 },
-            mo: { name: 'Months (avg)', multiplier: 2.628e6 }, 
-            yr: { name: 'Years (avg)', multiplier: 3.154e7 }, 
-            dec: { name: 'Decades', multiplier: 3.154e8 },
-            cen: { name: 'Centuries', multiplier: 3.154e9 },
+            ns: { name: 'unit.time.ns', multiplier: 1e-9 },
+            microns: { name: 'unit.time.us', multiplier: 1e-6 },
+            ms: { name: 'unit.time.ms', multiplier: 0.001 },
+            s: { name: 'unit.time.s', multiplier: 1 },
+            min: { name: 'unit.time.min', multiplier: 60 },
+            h: { name: 'unit.time.h', multiplier: 3600 },
+            d: { name: 'unit.time.d', multiplier: 86400 },
+            wk: { name: 'unit.time.wk', multiplier: 604800 },
+            mo: { name: 'unit.time.mo', multiplier: 2.628e6 }, 
+            yr: { name: 'unit.time.yr', multiplier: 3.154e7 }, 
+            dec: { name: 'unit.time.dec', multiplier: 3.154e8 },
+            cen: { name: 'unit.time.cen', multiplier: 3.154e9 },
         }
     },
     digital: {
         labelKey: 'unit.category.digital',
         baseUnit: 'B',
         units: {
-            bit: { name: 'Bits (b)', multiplier: 0.125 },
-            byte: { name: 'Bytes (B)', multiplier: 1 },
-            kb: { name: 'Kilobytes (KB)', multiplier: 1024 },
-            mb: { name: 'Megabytes (MB)', multiplier: 1024 ** 2 },
-            gb: { name: 'Gigabytes (GB)', multiplier: 1024 ** 3 },
-            tb: { name: 'Terabytes (TB)', multiplier: 1024 ** 4 },
-            pb: { name: 'Petabytes (PB)', multiplier: 1024 ** 5 },
-            eb: { name: 'Exabytes (EB)', multiplier: 1024 ** 6 },
+            bit: { name: 'unit.dig.bit', multiplier: 0.125 },
+            byte: { name: 'unit.dig.byte', multiplier: 1 },
+            kb: { name: 'unit.dig.kb', multiplier: 1024 },
+            mb: { name: 'unit.dig.mb', multiplier: 1024 ** 2 },
+            gb: { name: 'unit.dig.gb', multiplier: 1024 ** 3 },
+            tb: { name: 'unit.dig.tb', multiplier: 1024 ** 4 },
+            pb: { name: 'unit.dig.pb', multiplier: 1024 ** 5 },
+            eb: { name: 'unit.dig.eb', multiplier: 1024 ** 6 },
         }
     }
 };
 
-type CategoryKey = keyof typeof CATEGORIES | 'bmi';
+export type CategoryKey = keyof typeof CATEGORIES | 'bmi';
 
-const UnitConverter: React.FC = () => {
-    const [activeCategory, setActiveCategory] = useState<CategoryKey>('length');
+interface UnitConverterProps {
+    initialCategory?: CategoryKey;
+}
+
+const UnitConverter: React.FC<UnitConverterProps> = ({ initialCategory = 'length' }) => {
+    const [activeCategory, setActiveCategory] = useState<CategoryKey>(initialCategory);
     const [values, setValues] = useState<Record<string, string>>({});
     const { addToHistory } = useHistory();
     const { t } = useLanguage();
 
+    // Actualizar categoría si la prop cambia (navegación desde el menú)
+    useEffect(() => {
+        if (initialCategory) {
+            setActiveCategory(initialCategory);
+        }
+    }, [initialCategory]);
+
     // Protección contra pérdida de datos: Activa si hay algún valor ingresado (solo para conversor estándar)
     useUnsavedChanges(activeCategory !== 'bmi' && Object.keys(values).length > 0);
 
+    // Resetear valores al cambiar de categoría
     useEffect(() => {
         setValues({});
     }, [activeCategory]);
@@ -203,10 +216,11 @@ const UnitConverter: React.FC = () => {
 
         const units = CATEGORIES[activeCategory as keyof typeof CATEGORIES].units;
         const firstEntry = nonEmptyEntries[0];
-        const inputStr = `${firstEntry[1]} ${units[firstEntry[0]].name}`;
+        // Usar t() para traducir el nombre de la unidad al guardar en historial
+        const inputStr = `${firstEntry[1]} ${t(units[firstEntry[0]].name)}`;
         
         const outputStr = nonEmptyEntries.slice(1, 4).map(([key, val]) => 
-            `${val} ${units[key].name}`
+            `${val} ${t(units[key].name)}`
         ).join(', ') + (nonEmptyEntries.length > 4 ? '...' : '');
 
         addToHistory({
@@ -268,7 +282,7 @@ const UnitConverter: React.FC = () => {
                             <InputGroup
                                 key={key}
                                 id={`${activeCategory}-${key}`}
-                                label={(data as UnitDefinition).name}
+                                label={t((data as UnitDefinition).name)}
                                 value={values[key] || ''}
                                 onChange={(e) => handleValueChange(key, e)}
                                 placeholder="0"

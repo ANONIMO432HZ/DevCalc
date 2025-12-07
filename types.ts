@@ -11,6 +11,7 @@ export enum CalculatorType {
   UnixTimestamp = 'unixTimestamp',
   NetworkTools = 'networkTools',
   AiAssistant = 'aiAssistant',
+  DiagramEditor = 'diagramEditor',
   BMI = 'bmi',
 }
 

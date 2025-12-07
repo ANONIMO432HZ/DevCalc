@@ -8,6 +8,7 @@ export type AccentPreset = 'lime' | 'purple' | 'blue' | 'rose' | 'orange' | 'too
 export const TOOL_COLORS: Record<string, string> = {
   [CalculatorType.Welcome]: '#84cc16',
   [CalculatorType.AiAssistant]: '#6366f1',
+  [CalculatorType.DiagramEditor]: '#d946ef',
   [CalculatorType.UnitConverter]: '#3b82f6',
   [CalculatorType.NumberBase]: '#a855f7',
   [CalculatorType.BitwiseCalculator]: '#14b8a6',

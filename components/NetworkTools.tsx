@@ -34,6 +34,7 @@ const NetworkTools: React.FC = () => {
   const [dnsType, setDnsType] = useState('A');
   const [dnsResults, setDnsResults] = useState<any[]>([]);
   const [isDnsLoading, setIsDnsLoading] = useState(false);
+  const [dnsError, setDnsError] = useState<string | null>(null);
 
   // --- Subnet State ---
   const [subnetIp, setSubnetIp] = useState('');
@@ -56,7 +57,7 @@ const NetworkTools: React.FC = () => {
         .then(data => {
             setIpData(data);
         })
-        .catch((err) => setIpData({ error: 'Connection Error' }))
+        .catch((err) => setIpData({ error: 'Servicio no disponible (api.ipify.org)' }))
         .finally(() => setLoadingIp(false));
     }
   }, [activeTool, ipData]);
@@ -88,6 +89,7 @@ const NetworkTools: React.FC = () => {
     if (!dnsDomain) return;
     setIsDnsLoading(true);
     setDnsResults([]);
+    setDnsError(null);
     try {
       const res = await fetch(`https://dns.google/resolve?name=${dnsDomain}&type=${dnsType}`);
       const data = await res.json();
@@ -99,6 +101,7 @@ const NetworkTools: React.FC = () => {
       }
     } catch (e) {
       console.error(e);
+      setDnsError("Error conectando al servicio DNS (dns.google). Verifica tu conexión.");
     } finally {
       setIsDnsLoading(false);
     }
@@ -233,20 +236,23 @@ const NetworkTools: React.FC = () => {
             
             {activeTool === 'myip' && (
                 <div className="space-y-6 animate-fadeIn">
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2"><GlobeIcon className="w-6 h-6 text-accent"/> {t('net.menu.myip')}</h3>
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <GlobeIcon className="w-6 h-6 text-accent"/> {t('net.menu.myip')}
+                        <span className="ml-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200 dark:border-amber-800/50 uppercase tracking-widest">{t('net.beta.badge')}</span>
+                    </h3>
                     {loadingIp ? (
                         <div className="text-center py-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div></div>
                     ) : ipData ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="col-span-1 sm:col-span-2 bg-slate-100 dark:bg-slate-900 p-6 rounded-xl text-center border border-slate-200 dark:border-slate-700">
-                                <p className="text-xs uppercase text-slate-500 font-bold mb-2">Public IP</p>
+                                <p className="text-xs uppercase text-slate-500 font-bold mb-2">{t('net.ip.public')}</p>
                                 <p className="text-3xl font-mono font-bold text-slate-800 dark:text-accent select-all">{ipData.ip || 'Error'}</p>
-                                {ipData.error && <p className="text-red-500 text-sm mt-2">{ipData.error}</p>}
+                                {ipData.error && <p className="text-red-500 text-sm mt-2 font-bold">{ipData.error}</p>}
                             </div>
-                            <InputGroup id="ip-city" label="City" value={ipData.city || '-'} onChange={()=>{}} placeholder="" readOnly />
-                            <InputGroup id="ip-region" label="Region" value={ipData.region || '-'} onChange={()=>{}} placeholder="" readOnly />
-                            <InputGroup id="ip-country" label="Country" value={ipData.country || ipData.country_name || '-'} onChange={()=>{}} placeholder="" readOnly />
-                            <InputGroup id="ip-org" label="ISP / Org" value={ipData.connection?.isp || ipData.org || '-'} onChange={()=>{}} placeholder="" readOnly />
+                            <InputGroup id="ip-city" label={t('net.ip.city')} value={ipData.city || '-'} onChange={()=>{}} placeholder="" readOnly />
+                            <InputGroup id="ip-region" label={t('net.ip.region')} value={ipData.region || '-'} onChange={()=>{}} placeholder="" readOnly />
+                            <InputGroup id="ip-country" label={t('net.ip.country')} value={ipData.country || ipData.country_name || '-'} onChange={()=>{}} placeholder="" readOnly />
+                            <InputGroup id="ip-org" label={t('net.ip.org')} value={ipData.connection?.isp || ipData.org || '-'} onChange={()=>{}} placeholder="" readOnly />
                         </div>
                     ) : <p className="text-red-500">Failed to load IP data.</p>}
                 </div>
@@ -254,7 +260,10 @@ const NetworkTools: React.FC = () => {
 
             {activeTool === 'ping' && (
                 <div className="space-y-6 animate-fadeIn">
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2"><PulseIcon className="w-6 h-6 text-accent"/> {t('net.menu.ping')}</h3>
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <PulseIcon className="w-6 h-6 text-accent"/> {t('net.menu.ping')}
+                        <span className="ml-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200 dark:border-amber-800/50 uppercase tracking-widest">{t('net.beta.badge')}</span>
+                    </h3>
                     <div className="flex gap-2">
                         <div className="flex-grow">
                             <InputGroup id="ping-input" label={t('net.label.domain')} value={pingHost} onChange={(e) => setPingHost(e.target.value)} placeholder="google.com, example.org..." />
@@ -281,7 +290,10 @@ const NetworkTools: React.FC = () => {
 
             {activeTool === 'dns' && (
                 <div className="space-y-6 animate-fadeIn">
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2"><SearchIcon className="w-6 h-6 text-accent"/> {t('net.menu.dns')}</h3>
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <SearchIcon className="w-6 h-6 text-accent"/> {t('net.menu.dns')}
+                        <span className="ml-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200 dark:border-amber-800/50 uppercase tracking-widest">{t('net.beta.badge')}</span>
+                    </h3>
                     <div className="flex flex-col sm:flex-row gap-4 items-end">
                         <div className="flex-grow w-full">
                             <InputGroup id="dns-host" label={t('net.label.domain')} value={dnsDomain} onChange={(e) => setDnsDomain(e.target.value)} placeholder="example.com" />
@@ -296,7 +308,11 @@ const NetworkTools: React.FC = () => {
                     </div>
                     
                     <div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 min-h-[100px]">
-                        {isDnsLoading ? <div className="text-center text-slate-500">Loading...</div> : dnsResults.length > 0 ? (
+                        {isDnsLoading ? (
+                            <div className="text-center text-slate-500">Loading...</div>
+                        ) : dnsError ? (
+                            <div className="text-center text-red-500 text-sm font-medium">{dnsError}</div>
+                        ) : dnsResults.length > 0 ? (
                             <div className="space-y-2">
                                 {dnsResults.map((rec, i) => (
                                     <div key={i} className="flex justify-between border-b border-slate-200 dark:border-slate-700 pb-2 last:border-0 font-mono text-sm">
@@ -305,14 +321,19 @@ const NetworkTools: React.FC = () => {
                                     </div>
                                 ))}
                             </div>
-                        ) : <div className="text-center text-slate-400 text-sm">No records found or invalid domain.</div>}
+                        ) : (
+                            <div className="text-center text-slate-400 text-sm">No records found or invalid domain.</div>
+                        )}
                     </div>
                 </div>
             )}
 
             {activeTool === 'subnet' && (
                 <div className="space-y-6 animate-fadeIn">
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2"><ChipIcon className="w-6 h-6 text-accent"/> {t('net.menu.subnet')} (IPv4)</h3>
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <ChipIcon className="w-6 h-6 text-accent"/> {t('net.menu.subnet')} (IPv4)
+                        <span className="ml-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200 dark:border-amber-800/50 uppercase tracking-widest">{t('net.beta.badge')}</span>
+                    </h3>
                     <div className="flex flex-col sm:flex-row gap-4 items-end">
                         <div className="flex-grow w-full">
                             <InputGroup id="sub-ip" label="IP Address" value={subnetIp} onChange={(e) => setSubnetIp(e.target.value)} placeholder="192.168.1.10" />
@@ -338,7 +359,10 @@ const NetworkTools: React.FC = () => {
 
             {activeTool === 'port' && (
                 <div className="space-y-6 animate-fadeIn">
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2"><PortIcon className="w-6 h-6 text-accent"/> {t('net.menu.port')}</h3>
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <PortIcon className="w-6 h-6 text-accent"/> {t('net.menu.port')}
+                        <span className="ml-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200 dark:border-amber-800/50 uppercase tracking-widest">{t('net.beta.badge')}</span>
+                    </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                         <InputGroup id="port-host" label={t('net.label.ip')} value={portHost} onChange={(e) => setPortHost(e.target.value)} placeholder="localhost, google.com..." />
@@ -366,7 +390,10 @@ const NetworkTools: React.FC = () => {
 
             {activeTool === 'ua' && (
                 <div className="space-y-6 animate-fadeIn">
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2"><UserIcon className="w-6 h-6 text-accent"/> {t('net.menu.ua')}</h3>
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <UserIcon className="w-6 h-6 text-accent"/> {t('net.menu.ua')}
+                        <span className="ml-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200 dark:border-amber-800/50 uppercase tracking-widest">{t('net.beta.badge')}</span>
+                    </h3>
                     <div className="bg-slate-100 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
                         <p className="font-mono text-sm text-slate-700 dark:text-slate-300 break-words leading-relaxed">{navigator.userAgent}</p>
                     </div>

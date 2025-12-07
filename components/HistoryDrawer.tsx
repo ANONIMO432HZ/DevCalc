@@ -47,7 +47,7 @@ const HistoryDrawer: React.FC = () => {
 
         <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
           <div className="pointer-events-auto w-screen max-w-md">
-            <div className="flex h-full flex-col overflow-y-scroll bg-white dark:bg-slate-900 shadow-xl">
+            <div className="flex h-full flex-col overflow-y-auto bg-white dark:bg-slate-900 shadow-xl scrollbar-custom">
               
               {/* Header */}
               <div className="bg-slate-50 dark:bg-slate-800 px-4 py-6 sm:px-6 border-b border-slate-200 dark:border-slate-700">

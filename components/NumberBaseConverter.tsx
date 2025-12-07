@@ -217,11 +217,11 @@ const NumberBaseConverter: React.FC = () => {
         <InputGroup id="hex" label={t('base.label.hexNum')} value={hex} onChange={handleNumericWrapper(handleHexChange)} placeholder="A" readOnly={isTextMode} error={numericError.field === 'hex' ? numericError.message : null} />
       </div>
 
-      <div className="text-right pt-2 flex justify-end gap-3">
-        <button onClick={saveToHistory} className="bg-accent hover:opacity-90 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200">
+      <div className="pt-4 flex flex-col sm:flex-row sm:justify-end gap-3">
+        <button onClick={saveToHistory} className="w-full sm:w-auto bg-accent hover:opacity-90 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200">
           {t('action.save')}
         </button>
-        <button onClick={clearAll} className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-md transition-colors duration-200">
+        <button onClick={clearAll} className="w-full sm:w-auto bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-md transition-colors duration-200">
           {t('action.clearAll')}
         </button>
       </div>

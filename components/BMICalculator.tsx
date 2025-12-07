@@ -76,6 +76,15 @@ const BMICalculator: React.FC = () => {
     });
   };
 
+  const resetCalculator = useCallback(() => {
+    setWeightKg('');
+    setHeightCm('');
+    setWeightLb('');
+    setHeightFt('');
+    setHeightIn('');
+    setResult(null);
+  }, []);
+
   return (
     <div className="space-y-8 animate-fadeIn">
       
@@ -184,8 +193,12 @@ const BMICalculator: React.FC = () => {
                       <p className="text-slate-700 dark:text-slate-300 font-medium">{result.risk}</p>
                   </div>
                   
-                  <div className="mt-6 flex gap-3">
-                      <button onClick={saveToHistory} className="bg-slate-800 dark:bg-slate-700 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors shadow-sm">
+                  <div className="mt-6 flex flex-col sm:flex-row gap-3 items-center">
+                      <button onClick={resetCalculator} className="bg-slate-800 dark:bg-slate-700 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors shadow-sm flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                          {t('bmi.btn.recalculate')}
+                      </button>
+                      <button onClick={saveToHistory} className="text-slate-500 hover:text-accent text-xs font-medium px-4 py-2 transition-colors">
                           {t('action.save')}
                       </button>
                   </div>

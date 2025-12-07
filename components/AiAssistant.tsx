@@ -1,11 +1,12 @@
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import ReactMarkdown from 'react-markdown';
 import TextareaGroup from './TextareaGroup';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useHistory } from '../contexts/HistoryContext';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
+import { useApiKey } from '../contexts/ApiKeyContext';
 import Mermaid from './Mermaid';
 
 const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -32,49 +33,67 @@ const CopyIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
+const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+);
+
 const MagicWandIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423 1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
     </svg>
 );
 
-const ChartBarIcon: React.FC<{ className?: string }> = ({ className }) => (
+const DocumentTextIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
 );
 
-const ChatBubbleIcon: React.FC<{ className?: string }> = ({ className }) => (
+const CloudOffIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 15l-1.5-1.5" />
     </svg>
 );
 
-type Mode = 'chat' | 'diagram';
-
-const DIAGRAM_PRESETS = [
-    { label: 'Flowchart (Simple)', code: 'graph TD\n    A[Start] --> B{Is it?}\n    B -- Yes --> C[OK]\n    C --> D[Rethink]\n    D --> B\n    B -- No --> E[End]' },
-    { label: 'Flowchart (Complex)', code: 'graph TB\n    sq[Square Rect] -- Link text --> ci((Circle))\n    au2([Stadium]) -- Link text --> ro([Rounded Square])\n    di{Diamond} -- Link text --> ro\n    di -- Link text --> cy((Cylinder))\n    cy -- Link text --> di' },
-    { label: 'Sequence Diagram', code: 'sequenceDiagram\n    Alice->>John: Hello John, how are you?\n    John-->>Alice: Great!\n    Alice-)John: See you later!' },
-    { label: 'Class Diagram', code: 'classDiagram\n    Animal <|-- Duck\n    Animal <|-- Fish\n    Animal <|-- Zebra\n    class Animal{\n        +int age\n        +String gender\n        +isMammal()\n        +mate()\n    }\n    class Duck{\n        +String beakColor\n        +swim()\n        +quack()\n    }' },
-    { label: 'State Diagram', code: 'stateDiagram-v2\n    [*] --> Still\n    Still --> [*]\n    Still --> Moving\n    Moving --> Still\n    Moving --> Crash\n    Crash --> [*]' },
-    { label: 'Gantt Chart', code: 'gantt\n    title A Gantt Diagram\n    dateFormat  YYYY-MM-DD\n    section Section\n    A task           :a1, 2014-01-01, 30d\n    Another task     :after a1  , 20d\n    section Another\n    Task in sec      :2014-01-12  , 12d\n    another task      : 24d' },
-    { label: 'ER Diagram', code: 'erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ LINE-ITEM : contains\n    CUSTOMER }|..|{ DELIVERY-ADDRESS : uses' },
-];
+const KeyIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+    </svg>
+);
 
 const AiAssistant: React.FC = () => {
   const { t } = useLanguage();
   const { addToHistory } = useHistory();
-  const [mode, setMode] = useState<Mode>('chat');
+  const { apiKey: userApiKey } = useApiKey();
+  
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
-  const [diagramCode, setDiagramCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [enhancing, setEnhancing] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  useUnsavedChanges(loading || (mode === 'diagram' && diagramCode.length > 0));
+  useUnsavedChanges(loading);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const handleAction = useCallback((actionPrompt: string) => {
     setPrompt(prev => prev ? `${actionPrompt}:\n\n${prev}` : actionPrompt);
@@ -89,14 +108,14 @@ const AiAssistant: React.FC = () => {
       }
   }, []);
 
-  const handleSend = useCallback(async (manualPrompt?: string, targetStateSetter?: (val: string) => void) => {
+  const handleSend = useCallback(async (manualPrompt?: string) => {
     const promptToSend = typeof manualPrompt === 'string' ? manualPrompt : prompt;
-    const setter = targetStateSetter || setResponse;
     
     if (!promptToSend.trim()) return;
     
-    if (!process.env.API_KEY) {
-        setError(t('ai.error.key'));
+    // Check for API Key - REQUIRED
+    if (!userApiKey) {
+        setError("Se requiere una API Key. Por favor, configúrala en Ajustes.");
         return;
     }
 
@@ -109,57 +128,29 @@ const AiAssistant: React.FC = () => {
 
     setLoading(true);
     setError(null);
-    if (!targetStateSetter) setResponse('');
+    setResponse('');
 
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: userApiKey });
         const model = 'gemini-2.5-flash';
 
         const resultStream = await ai.models.generateContentStream({
             model: model,
             contents: promptToSend,
             config: {
-                 systemInstruction: `Actúa como un Ingeniero de Visualización de Diagramas y Experto en Sintaxis de Mermaid, además de un Desarrollador Senior experto en código.
-
-### Reglas de Calidad Estrictas para Diagramas (Mermaid):
-
-1.  **Validación de Sintaxis:** Tu objetivo es generar código Mermaid impecable y listo para renderizar.
-2.  **Nodos de Decisión:** NUNCA uses comillas dobles (") para etiquetar el texto dentro de los nodos de decisión (rombos).
-    *   INCORRECTO: id{"¿Es válido?"}
-    *   CORRECTO: id{¿Es válido?}
-3.  **Nodos Estándar:** Para nodos que NO son de decisión (rectángulos, redondos, etc.), SIEMPRE encierra el texto en comillas dobles para evitar errores con caracteres especiales o paréntesis.
-    *   CORRECTO: A["Ingresar datos (kg)"]
-    *   INCORRECTO: A[Ingresar datos (kg)]
-4.  **Identificadores (IDs):** Los IDs de los nodos deben empezar por una letra y contener solo caracteres alfanuméricos.
-    *   CORRECTO: Step1, NodeA
-    *   INCORRECTO: 1, 1stStep, Node-1
-5.  **Etiquetas de Enlace:** Las etiquetas en los enlaces (-- Texto -->) deben ser concisas.
-6.  **Formato:** Asegúrate de que el bloque de código final esté envuelto correctamente en el bloque de lenguaje 'mermaid'.
-
-Para cualquier otra solicitud (Explicar código, Regex, SQL, etc.), actúa como un Desarrollador Senior conciso y técnico. Usa formato Markdown rico (listas, negritas, tablas) para estructurar tus respuestas.`,
+                 systemInstruction: `Actúa como un Desarrollador Senior experto en código y algoritmos. Proporciona respuestas concisas y técnicas. Usa formato Markdown rico (listas, negritas, tablas) para estructurar tus respuestas. Si se solicita un diagrama, genera código Mermaid válido envuelto en un bloque de código \`\`\`mermaid.`,
             }
         });
 
         let fullResponse = '';
-        if (targetStateSetter) setter('');
-
         for await (const chunk of resultStream) {
             if (controller.signal.aborted) break;
             const text = chunk.text || '';
             fullResponse += text;
-            if (targetStateSetter) {
-                setter(prev => prev + text);
-            } else {
-                setResponse(prev => prev + text);
-            }
+            setResponse(prev => prev + text);
         }
 
-        if (targetStateSetter && !controller.signal.aborted) {
-             const cleanCode = fullResponse.replace(/```mermaid\n|\n```|```/g, '').trim();
-             setter(cleanCode);
-        }
-
-        if (!controller.signal.aborted && !targetStateSetter) {
+        if (!controller.signal.aborted) {
             addToHistory({
                 tool: t('menu.aiAssistant'),
                 details: promptToSend.length > 30 ? promptToSend.substring(0, 30) + '...' : promptToSend,
@@ -171,7 +162,12 @@ Para cualquier otra solicitud (Explicar código, Regex, SQL, etc.), actúa como 
     } catch (err: any) {
         if (err.name !== 'AbortError') {
             console.error(err);
-            setError(err.message || "Error connecting to Gemini API");
+            const msg = err.message || "Error connecting to Gemini API";
+            if (msg.includes("403") || msg.includes("key")) {
+                setError("API Key inválida o cuota excedida. Verifica tu configuración.");
+            } else {
+                setError(msg);
+            }
         }
     } finally {
         if (abortControllerRef.current === controller) {
@@ -179,12 +175,13 @@ Para cualquier otra solicitud (Explicar código, Regex, SQL, etc.), actúa como 
             abortControllerRef.current = null;
         }
     }
-  }, [prompt, addToHistory, t]);
+  }, [prompt, addToHistory, t, userApiKey]);
 
   const handleEnhancePrompt = useCallback(async () => {
       if (!prompt.trim()) return;
-      if (!process.env.API_KEY) {
-          setError(t('ai.error.key'));
+
+      if (!userApiKey) {
+          setError("Se requiere una API Key para mejorar el prompt.");
           return;
       }
 
@@ -192,7 +189,7 @@ Para cualquier otra solicitud (Explicar código, Regex, SQL, etc.), actúa como 
       setError(null);
 
       try {
-          const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+          const ai = new GoogleGenAI({ apiKey: userApiKey });
           const model = 'gemini-2.5-flash';
           
           const result = await ai.models.generateContent({
@@ -215,211 +212,239 @@ Para cualquier otra solicitud (Explicar código, Regex, SQL, etc.), actúa como 
       } finally {
           setEnhancing(false);
       }
-  }, [prompt, t]);
-
-  const handleFixCode = useCallback((code: string, errorMsg: string) => {
-      const fixPrompt = `Actúa como Experto en Sintaxis Mermaid. Corrige el siguiente código que generó un error de renderizado. Contexto del Error: "${errorMsg}". Código Inválido:\n\`\`\`mermaid\n${code}\n\`\`\`\n\nDevuelve SOLO el bloque de código Markdown corregido.`;
-      
-      if (mode === 'diagram') {
-          handleSend(fixPrompt, setDiagramCode);
-      } else {
-          setPrompt(fixPrompt);
-          handleSend(fixPrompt);
-      }
-  }, [handleSend, mode]);
-
-  const handleAiDiagramEdit = useCallback((action: 'improve' | 'fix' | 'explain') => {
-      if (!diagramCode.trim()) return;
-      
-      let instruction = '';
-      let targetSetter = setDiagramCode;
-
-      if (action === 'improve') {
-          instruction = `Mejora el diseño, la claridad y la estética del siguiente diagrama Mermaid. Usa mejores formas de nodos, colores si aplica, y organiza el flujo:\n\`\`\`mermaid\n${diagramCode}\n\`\`\`\nDevuelve SOLO el bloque de código Mermaid.`;
-      } else if (action === 'fix') {
-          instruction = `Corrige cualquier error de sintaxis en este código Mermaid:\n\`\`\`mermaid\n${diagramCode}\n\`\`\`\nDevuelve SOLO el bloque de código Mermaid.`;
-      } else if (action === 'explain') {
-          instruction = `Explica detalladamente qué hace este diagrama Mermaid:\n\`\`\`mermaid\n${diagramCode}\n\`\`\``;
-          targetSetter = setResponse;
-          setMode('chat');
-      }
-
-      handleSend(instruction, targetSetter);
-  }, [diagramCode, handleSend]);
+  }, [prompt, t, userApiKey]);
 
   const handleClear = () => {
     setPrompt('');
     setResponse('');
     setError(null);
-    if (mode === 'diagram') setDiagramCode('');
   };
 
-  const handleLoadPreset = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const code = e.target.value;
-      if (code) {
-          setDiagramCode(code);
-      }
-      e.target.value = '';
+  const handleCopyResponse = () => {
+    if (!response) return;
+    navigator.clipboard.writeText(response);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
+
+  if (!isOnline) {
+      return (
+          <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-fadeIn p-6">
+              <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-full mb-6 text-slate-400 dark:text-slate-500">
+                  <CloudOffIcon className="w-16 h-16" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">{t('ai.offline.title')}</h2>
+              <p className="text-slate-500 dark:text-slate-400 max-w-md">{t('ai.offline.desc')}</p>
+          </div>
+      );
+  }
+
+  // Warning if no key is configured
+  const hasKey = !!userApiKey;
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn">
       
-      {/* Mode Switcher */}
-      <div className="flex justify-center mb-6">
-        <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl inline-flex gap-1 border border-slate-200 dark:border-slate-700 shadow-sm">
-            <button onClick={() => setMode('chat')} className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${mode === 'chat' ? 'bg-white dark:bg-slate-600 text-accent dark:text-white shadow-md transform scale-105' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}><ChatBubbleIcon className="w-4 h-4" />{t('ai.mode.chat')}</button>
-            <button onClick={() => setMode('diagram')} className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${mode === 'diagram' ? 'bg-white dark:bg-slate-600 text-accent dark:text-white shadow-md transform scale-105' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}><ChartBarIcon className="w-4 h-4" />{t('ai.mode.diagram')}</button>
+        {/* Header & Suggestions - Centered */}
+        <div className="flex flex-col items-center gap-4">
+            <span className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800/50 uppercase tracking-widest shadow-sm">
+                {t('ai.beta.badge')}
+            </span>
+
+            <div className="bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                <div className="flex flex-wrap justify-center gap-2">
+                    <button onClick={() => handleAction("Genera una Regex para")} className="px-3 py-1.5 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all hover:scale-105 shadow-sm">{t('ai.btn.regex')}</button>
+                    <button onClick={() => handleAction("Explica este código")} className="px-3 py-1.5 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all hover:scale-105 shadow-sm">{t('ai.btn.explain')}</button>
+                    <button onClick={() => handleAction("Encuentra errores en")} className="px-3 py-1.5 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all hover:scale-105 shadow-sm">{t('ai.btn.fix')}</button>
+                    <button onClick={() => handleAction("Crea un diagrama de flujo sobre")} className="px-3 py-1.5 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all hover:scale-105 shadow-sm">{t('ai.btn.flowchart')}</button>
+                </div>
+            </div>
         </div>
-      </div>
 
-      {mode === 'chat' ? (
-          <>
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mb-4">
-                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 block px-1">{t('ai.quick_suggestions')}</span>
-                <div className="flex flex-wrap gap-2">
-                    <button onClick={() => handleAction("Genera una Regex para")} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold hover:border-accent hover:text-accent transition-colors shadow-sm">{t('ai.btn.regex')}</button>
-                    <button onClick={() => handleAction("Explica este código")} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold hover:border-accent hover:text-accent transition-colors shadow-sm">{t('ai.btn.explain')}</button>
-                    <button onClick={() => handleAction("Encuentra errores en")} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold hover:border-accent hover:text-accent transition-colors shadow-sm">{t('ai.btn.fix')}</button>
-                    <button onClick={() => handleAction("Crea un diagrama de flujo sobre")} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold hover:border-accent hover:text-accent transition-colors shadow-sm">{t('ai.btn.flowchart')}</button>
-                </div>
+        {/* Input Area */}
+        <div className="flex flex-col gap-6">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-1">
+                <TextareaGroup 
+                    id="ai-prompt" 
+                    label="" 
+                    value={prompt} 
+                    onChange={(e) => setPrompt(e.target.value)} 
+                    placeholder={hasKey ? t('ai.ph.prompt') : "Configura tu API Key en Ajustes para comenzar..."}
+                    rows={6} 
+                    disabled={loading || enhancing || !hasKey} 
+                />
+                
+                {error && (
+                    <div className="mx-2 mb-2 p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-sm flex items-center gap-2 animate-fadeIn">
+                        <AlertIcon className="w-5 h-5 flex-shrink-0" />
+                        <span className="font-medium">{error}</span>
+                    </div>
+                )}
+                
+                {!hasKey && !error && (
+                    <div className="mx-2 mb-2 p-3 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm flex items-center gap-2">
+                        <KeyIcon className="w-5 h-5 flex-shrink-0" />
+                        <span className="font-medium">Falta API Key. Ve a Ajustes (⚙️) para configurarla.</span>
+                    </div>
+                )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-                <div className="flex flex-col h-full">
-                    <TextareaGroup id="ai-prompt" label={t('ai.label.prompt')} value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={t('ai.ph.prompt')} rows={12} disabled={loading || enhancing} />
-                    <div className="mt-4 flex flex-wrap gap-3">
-                        {loading || enhancing ? (
-                            <button onClick={handleStop} className="flex-grow flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md transition-all shadow-md animate-pulse"><StopIcon className="w-5 h-5" />{t('action.stop')}</button>
-                        ) : (
-                            <>
-                                <button onClick={() => handleSend()} disabled={!prompt.trim()} className="flex-grow flex items-center justify-center gap-2 bg-accent hover:opacity-90 text-white font-bold py-3 px-6 rounded-md transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"><SparklesIcon className="w-5 h-5" />{t('action.ask')}</button>
-                                <button onClick={handleEnhancePrompt} disabled={!prompt.trim()} className="flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold py-3 px-4 rounded-md transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed border border-amber-500/20" title={t('ai.btn.enhance')}><MagicWandIcon className="w-5 h-5" /><span className="hidden sm:inline">{t('ai.btn.enhance')}</span></button>
-                            </>
-                        )}
-                        <button onClick={handleClear} disabled={loading || enhancing} className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold py-3 px-6 rounded-md transition-colors">{t('action.clear')}</button>
-                    </div>
-                    {error && (<div className="mt-4 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-sm flex items-start gap-3 shadow-sm animate-fadeIn"><AlertIcon className="w-5 h-5 flex-shrink-0 mt-0.5" /><div className="flex flex-col gap-1"><span className="font-bold">Error</span><span className="opacity-90">{error}</span></div></div>)}
+            {/* Central Action Bar */}
+            <div className="flex flex-wrap items-center justify-center gap-4">
+                {/* Secondary: Enhance */}
+                <button 
+                    onClick={handleEnhancePrompt} 
+                    disabled={loading || enhancing || !prompt.trim() || !hasKey} 
+                    className="flex items-center gap-2 px-5 py-3 text-sm font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md" 
+                    title={t('ai.btn.enhance')}
+                >
+                    <MagicWandIcon className={`w-5 h-5 ${enhancing ? 'animate-spin' : ''}`} />
+                    <span className="hidden sm:inline">{t('ai.btn.enhance')}</span>
+                </button>
+
+                {/* Primary: Ask/Stop */}
+                {loading || enhancing ? (
+                    <button 
+                        onClick={handleStop} 
+                        className="flex-grow sm:flex-grow-0 sm:w-48 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 px-8 rounded-xl transition-all shadow-lg hover:shadow-red-500/30 active:scale-95"
+                    >
+                        <StopIcon className="w-6 h-6 animate-pulse" />
+                        {t('action.stop')}
+                    </button>
+                ) : (
+                    <button 
+                        onClick={() => handleSend()} 
+                        disabled={!prompt.trim() || !hasKey} 
+                        className="flex-grow sm:flex-grow-0 sm:w-48 flex items-center justify-center gap-2 bg-gradient-to-r from-accent to-indigo-600 hover:to-indigo-500 text-white font-bold py-3.5 px-8 rounded-xl transition-all shadow-lg hover:shadow-accent/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                    >
+                        <SparklesIcon className="w-6 h-6" />
+                        {t('action.ask')}
+                    </button>
+                )}
+
+                {/* Secondary: Clear */}
+                <button 
+                    onClick={handleClear} 
+                    disabled={loading || enhancing} 
+                    className="flex items-center gap-2 px-5 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
+                >
+                    {t('action.clear')}
+                </button>
+            </div>
+        </div>
+
+        {/* Output Area */}
+        <div className="flex flex-col min-h-[400px] bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-inner transition-all">
+            <div className="flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-2">
+                     <div className="p-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
+                        <DocumentTextIcon className="w-4 h-4 text-accent" />
+                     </div>
+                     <label className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">{t('ai.label.response')}</label>
                 </div>
-
-                <div className="flex flex-col h-full min-h-[300px]">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">{t('ai.label.response')}</label>
-                    <div className="flex-grow w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md p-4 overflow-y-auto prose dark:prose-invert prose-sm max-w-none shadow-inner">
-                        {response ? (
-                            <ReactMarkdown
-                                components={{
-                                    h1: ({node, ...props}) => <h1 className="text-2xl font-bold mt-6 mb-4 pb-2 border-b border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white" {...props} />,
-                                    h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-5 mb-3 text-slate-800 dark:text-white" {...props} />,
-                                    h3: ({node, ...props}) => <h3 className="text-lg font-bold mt-4 mb-2 text-slate-800 dark:text-white" {...props} />,
-                                    ul: ({node, ...props}) => <ul className="list-disc list-outside ml-6 mb-4 space-y-1 text-slate-700 dark:text-slate-300" {...props} />,
-                                    ol: ({node, ...props}) => <ol className="list-decimal list-outside ml-6 mb-4 space-y-1 text-slate-700 dark:text-slate-300" {...props} />,
-                                    li: ({node, ...props}) => <li className="pl-1" {...props} />,
-                                    blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-accent pl-4 py-1 my-4 italic bg-slate-100 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 rounded-r" {...props} />,
-                                    a: ({node, ...props}) => <a className="text-accent hover:underline font-medium" target="_blank" rel="noopener noreferrer" {...props} />,
-                                    p: ({node, ...props}) => <p className="mb-4 leading-relaxed text-slate-700 dark:text-slate-300" {...props} />,
-                                    table: ({node, ...props}) => <div className="overflow-x-auto my-4 rounded-lg border border-slate-200 dark:border-slate-700"><table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700" {...props} /></div>,
-                                    thead: ({node, ...props}) => <thead className="bg-slate-100 dark:bg-slate-800" {...props} />,
-                                    th: ({node, ...props}) => <th className="px-4 py-2 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" {...props} />,
-                                    td: ({node, ...props}) => <td className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-slate-700" {...props} />,
-                                    code({node, inline, className, children, ...props}: any) {
-                                        const match = /language-(\w+)/.exec(className || '');
-                                        const language = match ? match[1] : '';
-                                        const codeContent = String(children).replace(/\n$/, '');
-
-                                        if (!inline && language === 'mermaid') {
-                                            return (
-                                                <Mermaid 
-                                                    chart={codeContent} 
-                                                    onFix={handleFixCode}
-                                                />
-                                            );
-                                        }
-                                        
-                                        if (!inline) {
-                                            return (
-                                                <div className="relative group my-4 rounded-lg bg-slate-900 border border-slate-700/50 overflow-hidden shadow-sm">
-                                                    <div className="flex justify-between items-center px-3 py-1.5 bg-slate-800/50 border-b border-slate-700/50">
-                                                        <span className="text-[10px] uppercase text-slate-500 font-mono">{language || 'text'}</span>
-                                                        <button 
-                                                            onClick={() => navigator.clipboard.writeText(codeContent)}
-                                                            className="text-slate-500 hover:text-white transition-colors p-1 rounded hover:bg-white/10"
-                                                            title="Copiar código"
-                                                        >
-                                                            <CopyIcon className="w-3.5 h-3.5" />
-                                                        </button>
-                                                    </div>
-                                                    <div className="p-3 overflow-x-auto">
-                                                        <code className={`font-mono text-xs sm:text-sm text-slate-300 ${className}`} {...props}>
-                                                            {children}
-                                                        </code>
-                                                    </div>
-                                                </div>
-                                            )
-                                        }
-
-                                        return (
-                                            <code className={`${className} bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-sm font-mono text-accent dark:text-accent`} {...props}>
-                                                {children}
-                                            </code>
-                                        );
-                                    }
-                                }}
+                <div className="flex items-center gap-3">
+                    {response && !loading && !enhancing && (
+                        <>
+                            <span className="text-xs font-mono text-slate-400 hidden sm:inline">MARKDOWN</span>
+                            <div className="hidden sm:block h-4 w-px bg-slate-300 dark:bg-slate-600"></div>
+                            <button 
+                                onClick={handleCopyResponse}
+                                className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-accent dark:text-slate-400 dark:hover:text-accent transition-colors"
+                                title={t('action.copy')}
                             >
-                                {response}
-                            </ReactMarkdown>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-600 opacity-50">{enhancing ? (<><MagicWandIcon className="w-12 h-12 mb-2 animate-pulse text-amber-500" /><span className="text-sm font-medium text-amber-500">{t('ai.status.enhancing')}</span></>) : (<><SparklesIcon className="w-12 h-12 mb-2" /><span className="text-sm">Gemini AI Ready</span></>)}</div>
-                        )}
-                    </div>
+                                {copied ? <CheckIcon className="w-4 h-4 text-green-500" /> : <CopyIcon className="w-4 h-4" />}
+                                <span className={copied ? "text-green-500" : ""}>{copied ? t('action.saved') : t('action.copy')}</span>
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
-          </>
-      ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full animate-fadeIn">
-              <div className="flex flex-col h-full">
-                  <TextareaGroup id="diagram-editor" label={t('ai.label.editor')} value={diagramCode} onChange={(e) => setDiagramCode(e.target.value)} placeholder={t('ai.ph.editor')} rows={20} disabled={loading} />
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                        <select 
-                            onChange={handleLoadPreset} 
-                            className="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md py-2.5 px-3 text-sm text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-accent outline-none shadow-sm cursor-pointer"
-                            defaultValue=""
-                        >
-                            <option value="" disabled>{t('ai.diagram.presets')}</option>
-                            {DIAGRAM_PRESETS.map((p, i) => (
-                                <option key={i} value={p.code}>{p.label}</option>
-                            ))}
-                        </select>
+            
+            <div className="flex-grow p-6 sm:p-8 overflow-y-auto prose dark:prose-invert prose-sm sm:prose-base max-w-none scrollbar-custom">
+                {response ? (
+                    <ReactMarkdown
+                        components={{
+                            h1: ({node, ...props}) => <h1 className="text-3xl font-bold mt-8 mb-4 pb-2 border-b border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-2xl font-bold mt-6 mb-3 text-slate-800 dark:text-white" {...props} />,
+                            h3: ({node, ...props}) => <h3 className="text-xl font-bold mt-5 mb-2 text-slate-800 dark:text-white" {...props} />,
+                            ul: ({node, ...props}) => <ul className="list-disc list-outside ml-6 mb-4 space-y-2 text-slate-700 dark:text-slate-300" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal list-outside ml-6 mb-4 space-y-2 text-slate-700 dark:text-slate-300" {...props} />,
+                            li: ({node, ...props}) => <li className="pl-1 leading-relaxed" {...props} />,
+                            blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-accent pl-4 py-1 my-6 italic bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-r-lg" {...props} />,
+                            a: ({node, ...props}) => <a className="text-accent hover:underline font-bold transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
+                            p: ({node, ...props}) => <p className="mb-4 leading-relaxed text-slate-700 dark:text-slate-300" {...props} />,
+                            table: ({node, ...props}) => <div className="overflow-x-auto my-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm"><table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700" {...props} /></div>,
+                            thead: ({node, ...props}) => <thead className="bg-slate-100 dark:bg-slate-800" {...props} />,
+                            th: ({node, ...props}) => <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" {...props} />,
+                            td: ({node, ...props}) => <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-slate-700" {...props} />,
+                            code({node, inline, className, children, ...props}: any) {
+                                const match = /language-(\w+)/.exec(className || '');
+                                const language = match ? match[1] : '';
+                                const codeContent = String(children).replace(/\n$/, '');
 
-                        {loading ? (
-                            <button onClick={handleStop} className="flex-grow flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition-all shadow-md animate-pulse"><StopIcon className="w-4 h-4" />{t('action.stop')}</button>
-                        ) : (
-                            <>
-                                <button onClick={() => handleAiDiagramEdit('improve')} disabled={!diagramCode.trim()} className="bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 font-semibold py-2 px-4 rounded-md transition-all text-sm flex items-center gap-2 disabled:opacity-50"><MagicWandIcon className="w-4 h-4" />{t('ai.btn.improve_diagram')}</button>
-                                <button onClick={() => handleAiDiagramEdit('fix')} disabled={!diagramCode.trim()} className="bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800 font-semibold py-2 px-4 rounded-md transition-all text-sm flex items-center gap-2 disabled:opacity-50"><AlertIcon className="w-4 h-4" />{t('ai.btn.autofix')}</button>
-                                <button onClick={() => handleAiDiagramEdit('explain')} disabled={!diagramCode.trim()} className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-md transition-all text-sm flex items-center gap-2 disabled:opacity-50"><ChatBubbleIcon className="w-4 h-4" />{t('ai.btn.explain')}</button>
-                            </>
-                        )}
-                        <button onClick={handleClear} disabled={loading} className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold py-2 px-4 rounded-md transition-colors text-sm">{t('action.clear')}</button>
-                  </div>
-                  {error && (<div className="mt-4 p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-sm flex items-start gap-2"><AlertIcon className="w-4 h-4 flex-shrink-0 mt-0.5" /><span>{error}</span></div>)}
-              </div>
-              <div className="flex flex-col h-full min-h-[400px]">
-                  <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">{t('ai.label.preview')}</label>
-                  <div className="flex-grow w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md p-4 overflow-auto shadow-inner flex items-center justify-center">
-                        {diagramCode.trim() ? (
-                            <div className="w-full">
-                                <Mermaid chart={diagramCode} onFix={(code, err) => handleFixCode(code, err)} />
+                                if (!inline && language === 'mermaid') {
+                                    return (
+                                        <div className="my-6">
+                                            <Mermaid chart={codeContent} showTools={true} />
+                                        </div>
+                                    );
+                                }
+                                
+                                if (!inline) {
+                                    return (
+                                        <div className="relative group my-6 rounded-xl bg-[#1e293b] border border-slate-700 shadow-lg overflow-hidden">
+                                            <div className="flex justify-between items-center px-4 py-2 bg-[#0f172a]/50 border-b border-slate-700/50">
+                                                <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">{language || 'text'}</span>
+                                                <button 
+                                                    onClick={() => navigator.clipboard.writeText(codeContent)}
+                                                    className="text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
+                                                    title="Copiar código"
+                                                >
+                                                    <CopyIcon className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <div className="p-4 overflow-x-auto">
+                                                <code className={`font-mono text-sm text-slate-300 ${className}`} {...props}>
+                                                    {children}
+                                                </code>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+
+                                return (
+                                    <code className={`${className} bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono text-accent dark:text-accent font-semibold`} {...props}>
+                                        {children}
+                                    </code>
+                                );
+                            }
+                        }}
+                    >
+                        {response}
+                    </ReactMarkdown>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-slate-400 dark:text-slate-600 transition-opacity duration-500">
+                        {enhancing ? (
+                            <div className="flex flex-col items-center animate-pulse">
+                                <MagicWandIcon className="w-16 h-16 mb-4 text-amber-500 opacity-80" />
+                                <span className="text-lg font-medium text-amber-600 dark:text-amber-500">{t('ai.status.enhancing')}</span>
+                            </div>
+                        ) : loading ? (
+                            <div className="flex flex-col items-center animate-pulse">
+                                <SparklesIcon className="w-16 h-16 mb-4 text-accent opacity-80" />
+                                <span className="text-lg font-medium text-accent">{t('ai.status.thinking')}</span>
                             </div>
                         ) : (
-                            <div className="text-center text-slate-400 dark:text-slate-600 opacity-50">
-                                <ChartBarIcon className="w-16 h-16 mb-2 mx-auto" />
-                                <span className="text-sm">Live Preview</span>
+                            <div className="flex flex-col items-center opacity-40">
+                                <SparklesIcon className="w-20 h-20 mb-4" />
+                                <span className="text-lg font-medium">Gemini AI Ready</span>
+                                <span className="text-sm mt-1">Escribe tu prompt arriba para comenzar</span>
                             </div>
                         )}
-                  </div>
-              </div>
-          </div>
-      )}
+                    </div>
+                )}
+            </div>
+        </div>
     </div>
   );
 };
