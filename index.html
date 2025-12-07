@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <!-- Primary Meta Tags -->
   <title>DevSuite: Developer Tools & Utilities | Kit de Desarrollo All-in-One</title>
   <meta name="title" content="DevSuite: Developer Tools & Utilities | Kit de Desarrollo All-in-One">
@@ -37,8 +37,31 @@
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   
   <!-- Structured Data (JSON-LD) for SEO Rich Snippets -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "DevSuite",
+      "url": "https://dev-suite.vercel.app/",
+      "image": "https://dev-suite.vercel.app/icons/icon-512.png",
+      "description": "Una suite completa de utilidades para desarrolladores y creativos. Incluye conversión universal, manipulación de datos (JSON/YAML), criptografía, herramientas de color y diagramas con IA.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": "Unit Converter, JSON Formatter, Base64 Encoder, Hash Generator, UUID Generator, Color Palette, Mermaid Diagram Editor, AI Assistant, Network Tools",
+      "author": {
+        "@type": "Person",
+        "name": "ANONIMO432HZ"
+      },
+      "browserRequirements": "Requires JavaScript. Works offline."
+    }
+  </script>
 
-  <!-- Estilos Compilados -->
+  <!-- Estilos Compilados (Mantener como fallback o para producción) -->
   <link href="/styles.css" rel="stylesheet">
 
   <!-- Script inline para evitar Flash of Incorrect Theme (FOUC) -->
@@ -65,22 +88,6 @@
       }
     })();
   </script>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "js-yaml": "https://aistudiocdn.com/js-yaml@^4.1.1",
-    "smol-toml": "https://aistudiocdn.com/smol-toml@^1.5.2",
-    "crypto-js": "https://aistudiocdn.com/crypto-js@^4.2.0",
-    "@noble/hashes/": "https://aistudiocdn.com/@noble/hashes@^2.0.1/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
-    "mermaid": "https://aistudiocdn.com/mermaid@^11.12.2"
-  }
-}
-</script>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
   <div id="root"></div>
@@ -88,8 +95,9 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('SW registered'))
+        // Registro explícito con scope en la raíz
+        navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+          .then(reg => console.log('SW registered with scope:', reg.scope))
           .catch(err => console.log('SW registration failed:', err));
       });
     }
