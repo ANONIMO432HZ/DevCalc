@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'devsuite-v41';
+const CACHE_NAME = 'devsuite-v40';
 
 // Archivos que SIEMPRE deben estar en caché para que la app arranque
 const CRITICAL_ASSETS = [
